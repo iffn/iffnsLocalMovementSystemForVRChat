@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: WalkingStationControllerManualSync
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 08e958f77f1a5994cbe1eff7c05de856,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 9f9962c7afe882c4b8e4d58804cc4f43,
     type: 2}
   udonAssembly: 
   assemblyError: 
