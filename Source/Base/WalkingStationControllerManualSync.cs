@@ -166,7 +166,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             LinkedStationAutoSync.LinkedVRCStation.PlayerMobility = VRCStation.Mobility.Mobile;
             LinkedStationAutoSync.LinkedVRCStation.disableStationExit = true;
 
-            LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("Setting up station");
+            LinkedStationAssigner.GetLinkedMainController().OutputLogText("Setting up station");
 
             if (Networking.LocalPlayer.IsValid()) LinkedStationAutoSync.LinkedVRCStation.UseStation(player: Networking.LocalPlayer);
             else

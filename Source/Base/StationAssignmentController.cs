@@ -66,7 +66,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             if (availableStation == null) return; //Error: Not enough stations
 
-            LinkedMainController.OutputLogWarning("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Join as fisrt)");
+            LinkedMainController.OutputLogText("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Join as fisrt)");
             availableStation.LinkedStationManualSync.AttachedPlayerId = Networking.LocalPlayer.playerId;
             availableStation.LinkedStationManualSync.AttachedDimensionId = 0;
 
