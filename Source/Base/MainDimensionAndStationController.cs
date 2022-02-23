@@ -23,7 +23,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         /*
         Current test world problems:
         ----------------------------
-        - Boats drive through the island -> Add collider
+        
 
         Stuff to be fixed:
         ------------------
