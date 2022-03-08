@@ -2,6 +2,7 @@
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
+using iffnsStuff.iffnsVRCStuff.DebugOutput;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
@@ -10,6 +11,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         DimensionController CurrentDimension;
         [SerializeField] MainDimensionAndStationController LinkedMainController;
         [SerializeField] DimensionController[] Dimensions;
+        [SerializeField] SingleScriptDebugState LinkedStateOutput;
 
         Transform DimensionTransformationHelper;
 
@@ -48,6 +50,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         void Start()
         {
             //Use setup instead
+        }
+
+        void Update()
+        {
+            PrepareDebugState();
         }
 
         public Quaternion GetHeadingRotationFromRotation(Quaternion rotation)
@@ -91,6 +98,24 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //LinkedMainController.OutputLogText("Player position before making the current dimension = " + DimensionTransformationHelper.position);
 
             CurrentDimension.MakeCurrentDimension(PlayerShouldPeLocation: DimensionTransformationHelper);
+        }
+
+        public void PrepareDebugState()
+        {
+            if (LinkedStateOutput == null) return;
+
+            if (!LinkedStateOutput.IsReadyForOutput()) return;
+
+            string name = "MainDimensionController";
+
+            string currentState = "";
+
+            for (int i = 0; i < Dimensions.Length; i++)
+            {
+                currentState += Dimensions[i].GetCurrentDebugState() + newLine;
+            }
+
+            LinkedStateOutput.SetCurrentState(displayName: name, currentState: currentState);
         }
 
         public string GetCurrentDebugState()

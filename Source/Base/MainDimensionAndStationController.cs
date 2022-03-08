@@ -3,6 +3,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 using VRC.Udon.Common;
+using iffnsStuff.iffnsVRCStuff.DebugOutput;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
@@ -12,6 +13,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] StationAssignmentController LinkedStationAssigner;
         [SerializeField] Transform DimensionTransformationHelper;
         [SerializeField] bool SaveLogText;
+        [SerializeField] SingleScriptDebugState LinkedLogOutput;
 
         //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
@@ -84,7 +86,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string text = Time.time + ": " + DebugStringTitle + DebugStringLog + message;
 
             Debug.Log(text);
-            if (SaveLogText) logText += text + newLine;
+            if (SaveLogText)
+            {
+                logText += text + newLine;
+                SendLogText();
+            }
         }
 
         public void OutputLogWarning(string message)
@@ -173,6 +179,17 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
 
             LinkedStationAssigner.PlayerLeft(player: player);
+        }
+
+        public void SendLogText()
+        {
+            if (LinkedLogOutput == null) return;
+
+            string name = "Local movement system log";
+
+            string currentState = logText;
+
+            LinkedLogOutput.SetCurrentState(displayName: name, currentState: currentState);
         }
 
         public string GetCurrentDebugState()

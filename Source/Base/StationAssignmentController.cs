@@ -3,6 +3,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 using VRC.Udon.Common;
+using iffnsStuff.iffnsVRCStuff.DebugOutput;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
@@ -11,6 +12,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         //Unity assignments
         [SerializeField] MainDimensionAndStationController LinkedMainController;
         [SerializeField] WalkingStationController[] WalkingStationControllers;
+        [SerializeField] SingleScriptDebugState LinkedStateOutput;
 
         public Transform StationTransformationHelper;
 
@@ -113,6 +115,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     LinkedMainController.OutputLogWarning("Local player is not in station. Station not yet assigned. Waiting for Deserialization");
                 }
             }
+
+            PrepareDebugState();
         }
 
         public void PlayerJoined(VRCPlayerApi player)
@@ -191,6 +195,28 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             MyStation.LinkedStationManualSync.SetAttachedDimensionReference(newDimension: newDimension);
         }
 
+        public void PrepareDebugState()
+        {
+            if (LinkedStateOutput == null) return;
+
+            if (!LinkedStateOutput.IsReadyForOutput()) return;
+
+            string name = "StationAssignmentController";
+
+            string currentState = "";
+
+            for (int i = 0; i < WalkingStationControllers.Length; i++)
+            {
+                //if (WalkingStationControllers[i].LinkedStationManualSync.AttachedPlayerId > 0)
+                if (i < 5)
+                {
+                    currentState += WalkingStationControllers[i].GetCurrentDebugState() + newLine;
+                }
+            }
+
+            LinkedStateOutput.SetCurrentState(displayName: name, currentState: currentState);
+        }
+
         public string GetCurrentDebugState()
         {
             string returnString = "";
@@ -198,8 +224,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             for (int i = 0; i < WalkingStationControllers.Length; i++)
             {
-                //if (WalkingStationControllers[i].LinkedStationManualSync.AttachedPlayerId > 0)
-                if (i < 5)
+                //if (i < 5)
+                if (WalkingStationControllers[i].LinkedStationManualSync.AttachedPlayerId > 0)
                 {
                     returnString += WalkingStationControllers[i].GetCurrentDebugState() + newLine;
                 }
