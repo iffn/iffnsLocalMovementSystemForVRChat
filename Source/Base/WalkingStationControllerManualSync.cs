@@ -76,8 +76,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             RequestSerialization();
         }
 
-        
-
         void RequestDelayedSerialization()
         {
             requestDelayedSerialization = true;

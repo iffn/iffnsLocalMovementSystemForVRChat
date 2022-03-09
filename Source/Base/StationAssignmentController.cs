@@ -57,6 +57,19 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
+        public WalkingStationController GetStationControllerFromPlayerId(int playerId)
+        {
+            for(int i = 0; i<WalkingStationControllers.Length; i++)
+            {
+                if(WalkingStationControllers[i].LinkedStationManualSync.AttachedPlayerId == playerId)
+                {
+                    return WalkingStationControllers[i];
+                }
+            }
+
+            return null;
+        }
+
         void Start()
         {
             //Use setup instead

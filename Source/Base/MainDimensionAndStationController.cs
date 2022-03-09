@@ -74,7 +74,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             return LinkedMainDimensionController;
         }
 
-        public StationAssignmentController GetLinkedMainDimensionController()
+        public StationAssignmentController GetLinkedStationController()
         {
             return LinkedStationAssigner;
         }
