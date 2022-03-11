@@ -19,7 +19,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         [UdonSynced] int attachedPlayerID = -1;
         [UdonSynced] bool rightInsteadOfLeftHand = true;
         [UdonSynced] Vector3 LocalPositionSync;
-        [UdonSynced] Vector3 LocalEulerRotationSync;
+        [UdonSynced] Vector3 LocalEulerRotationSync; //Euler angles are enough since no transition between rotations are needed
 
         //Runtime variables
         VRC_Pickup linkedPickup;
@@ -44,9 +44,18 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             }
         }
 
+        double elapsedTime = 0;
+        float lastTime = 0;
+
         void Update()
         {
-            if(attachedPlayerID == myPlayerId)
+            if (attachedPlayerID < 1)
+            {
+                PrepareDebugState();
+                return;
+            }
+
+            if (attachedPlayerID == myPlayerId)
             {
                 int currentDimensionId = LinkedDimensionController.GetCurrentDimension().GetDimensionId();
 
@@ -56,7 +65,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
                     RequestSerialization();
                 }
             }
-            else if(attachedPlayerID > 0)
+            else
             {
                 HumanBodyBones attachedHand;
 
@@ -66,7 +75,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
                 transform.position = attachedPlayer.GetBonePosition(attachedHand);
                 transform.rotation = attachedPlayer.GetBoneRotation(attachedHand) * offsetRotation; //Offset because VRChat is weird
             }
-
+            
             PrepareDebugState();
         }
 
@@ -152,6 +161,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
             string currentState = "";
 
+            currentState += "update time = " + elapsedTime.ToString("0.000000000") + newLine;
             currentState += "attachedDimensionId = " + attachedDimensionId + newLine;
             currentState += "attachedPlayerID = " + attachedPlayerID + newLine;
             currentState += "rightInsteadOfLeftHand = " + rightInsteadOfLeftHand + newLine;
