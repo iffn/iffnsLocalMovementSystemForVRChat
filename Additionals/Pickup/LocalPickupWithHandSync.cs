@@ -44,9 +44,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             }
         }
 
-        double elapsedTime = 0;
-        float lastTime = 0;
-
         void Update()
         {
             if (attachedPlayerID < 1)
@@ -161,7 +158,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
             string currentState = "";
 
-            currentState += "update time = " + elapsedTime.ToString("0.000000000") + newLine;
             currentState += "attachedDimensionId = " + attachedDimensionId + newLine;
             currentState += "attachedPlayerID = " + attachedPlayerID + newLine;
             currentState += "rightInsteadOfLeftHand = " + rightInsteadOfLeftHand + newLine;
