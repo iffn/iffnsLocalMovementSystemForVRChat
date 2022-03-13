@@ -68,7 +68,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             SetupStationLater = false;
             AttachedDimensionId = 0;
             AttachedPlayerId = -1;
-            LinkedMainController.OutputLogWarning("Setting attached player ID of " + LinkedStationAutoSync.transform.name + " to -1 (Reset)");
+            //LinkedMainController.OutputLogWarning("Setting attached player ID of " + LinkedStationAutoSync.transform.name + " to -1 (Reset)");
         }
 
         public void RequestSerializationOnThis()
@@ -113,14 +113,14 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             RequestDelayedSerialization();
 
-            LinkedMainController.OutputLogText("Player joined with ID " + player.playerId + " -> Requesting serialization in " + serializationTimeDelay + "s");
+            //LinkedMainController.OutputLogText("Player joined with ID " + player.playerId + " -> Requesting serialization in " + serializationTimeDelay + "s");
 
             //RequestSerialization(); //-> Not received by rejoining owner as described above
         }
 
         public override void OnDeserialization()
         {
-            LinkedMainController.OutputLogText("Deserialization called on " + LinkedStationAutoSync.transform.name + " with player ID = " + AttachedPlayerId + " and dimension ID " + AttachedDimensionId);
+            //LinkedMainController.OutputLogText("Deserialization called on " + LinkedStationAutoSync.transform.name + " with player ID = " + AttachedPlayerId + " and dimension ID " + AttachedDimensionId);
 
             if (AttachedPlayerId == Networking.LocalPlayer.playerId) //Should be true if: The player joins but isn't the first player in the world
             {
@@ -164,7 +164,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             LinkedStationAutoSync.LinkedVRCStation.PlayerMobility = VRCStation.Mobility.Mobile;
             LinkedStationAutoSync.LinkedVRCStation.disableStationExit = true;
 
-            LinkedStationAssigner.GetLinkedMainController().OutputLogText("Setting up station");
+            //LinkedStationAssigner.GetLinkedMainController().OutputLogText("Setting up station");
 
             if (Networking.LocalPlayer.IsValid()) LinkedStationAutoSync.LinkedVRCStation.UseStation(player: Networking.LocalPlayer);
             else
@@ -222,7 +222,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
             else
             {
-                LinkedMainController.OutputLogText("Updating dimension attachment of " + transform.name);
+                //LinkedMainController.OutputLogText("Updating dimension attachment of " + transform.name);
 
                 //Set attached dimension
                 AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
@@ -252,7 +252,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public override void OnPreSerialization()
         {
-            LinkedMainController.OutputLogText("Serialization called");
+            //LinkedMainController.OutputLogText("Serialization called");
         }
     }
 }

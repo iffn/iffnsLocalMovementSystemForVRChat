@@ -14,12 +14,25 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
         //Synced variables
         MainDimensionController LinkedDimensionController;
+        VRC_Pickup linkedPickup;
+
 
         void Start()
         {
+            linkedPickup = (VRC_Pickup)transform.GetComponent(typeof(VRC_Pickup));
             LinkedDimensionController = LinkedMainDimensionAndStationController.GetLinkedDimensionController();
             transform.parent = InitiallyLinkedDimension.transform;
         }
+
+        private void Update()
+        {
+            if (linkedPickup.IsHeld)
+            {
+                DimensionController attachedDimension = LinkedDimensionController.GetCurrentDimension();
+                transform.parent = attachedDimension.transform;
+            }
+        }
+
 
         public override void OnDrop()
         {

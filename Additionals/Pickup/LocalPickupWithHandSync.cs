@@ -54,7 +54,10 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
             if (attachedPlayerID == myPlayerId)
             {
-                int currentDimensionId = LinkedDimensionController.GetCurrentDimension().GetDimensionId();
+                DimensionController attachedDimension = LinkedDimensionController.GetCurrentDimension();
+                transform.parent = attachedDimension.transform;
+
+                int currentDimensionId = attachedDimension.GetDimensionId();
 
                 if (currentDimensionId != attachedDimensionId) //Only needed if the player leaves while holding the pickup. Can be removed if this information is not lost
                 {

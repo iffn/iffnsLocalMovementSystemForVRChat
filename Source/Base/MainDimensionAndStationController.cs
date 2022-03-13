@@ -154,7 +154,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public void SetCurrentDimension(DimensionController newDimension)
         {
-            OutputLogText("Entering dimension called " + newDimension.transform.name);
+            //OutputLogText("Entering dimension called " + newDimension.transform.name);
 
             LinkedStationAssigner.SetMyDimension(newDimension);
 
