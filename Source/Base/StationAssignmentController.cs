@@ -13,8 +13,23 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] MainDimensionAndStationController LinkedMainController;
         [SerializeField] WalkingStationController[] WalkingStationControllers;
         [SerializeField] SingleScriptDebugState LinkedStateOutput;
+        [SerializeField] Transform SpawnPoint;
 
         public Transform StationTransformationHelper;
+
+        [HideInInspector] public bool PlayerIsCurrentlyUsingOtherStation = false;
+
+        /*
+        bool playerwasUsingOtherStation = false;
+        bool playerIsCurrentlyUsingOtherStation = false;
+
+        public void PlayerIsCurrentlyUsingOtherStation(bool state)
+        {
+            playerIsCurrentlyUsingOtherStation = state;
+
+            if (!state) playerwasUsingOtherStation = true;
+        }
+        */
 
         //Public variables
         [HideInInspector] public WalkingStationController MyStation;
@@ -48,7 +63,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 LinkedMainController.OutputLogWarning("StationTransformationHelper not assigned in StationAssignmentController");
 
             //Setup
-            Networking.LocalPlayer.Immobilize(true); //Player is set free, once they join the mobile station
+            //Networking.LocalPlayer.Immobilize(true); //Player is set free, once they join the mobile station
 
             for (int i = 0; i < WalkingStationControllers.Length; i++)
             {
@@ -138,17 +153,31 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             {
                 if (MyStation != null)
                 {
-                    //Respawn
-                    //Activate world dimension
-                    LinkedMainController.SetWorldDimensionAsActiveAndResetPosition();
+                    if (!PlayerIsCurrentlyUsingOtherStation)
+                    {
+                        if((Networking.LocalPlayer.GetPosition() - SpawnPoint.position).magnitude < 0.1f)
+                        {
+                            LinkedMainController.SetWorldDimensionAsActiveAndResetPosition();
+                            //LinkedMainController.OutputLogText("Respawn detected. Resetting world");
+                        }
+                        else
+                        {
+                            //LinkedMainController.OutputLogText("Station exit detected");
+                        }
 
-                    MyStation.LinkedVRCStation.UseStation(Networking.LocalPlayer); //.IsValid()
-                    //GetLinkedMainController().OutputLogText("Using station");
-                    
+                        //LinkedMainController.OutputLogText("Player position on walking station reentry = " + Networking.LocalPlayer.GetPosition());
+                        //Respawn
+                        //Activate world dimension
+
+                        MyStation.transform.position = Networking.LocalPlayer.GetPosition();
+                        MyStation.transform.rotation = Networking.LocalPlayer.GetRotation();
+                        MyStation.LinkedVRCStation.UseStation(Networking.LocalPlayer); //.IsValid()
+                                                                                       //GetLinkedMainController().OutputLogText("Using station");
+                    }
                 }
                 else
                 {
-                    LinkedMainController.OutputLogWarning("Local player is not in station. Station not yet assigned. Waiting for Deserialization");
+                    //LinkedMainController.OutputLogWarning("Local player is not in station. Station not yet assigned. Waiting for Deserialization");
                 }
             }
 
@@ -292,8 +321,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     returnString += "Station enabled = " + WalkingStationControllers[i].enabled + newLine;
                     returnString += newLine;
                 }
-
-                
             }
 
             return returnString;

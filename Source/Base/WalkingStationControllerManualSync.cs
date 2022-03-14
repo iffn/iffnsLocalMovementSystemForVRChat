@@ -7,7 +7,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
     public class WalkingStationControllerManualSync : UdonSharpBehaviour
     {
-        [SerializeField] public WalkingStationController LinkedStationAutoSync;
+        [SerializeField] public WalkingStationController LinkedWalkingStationController;
 
         MainDimensionAndStationController LinkedMainController;
         StationAssignmentController LinkedStationAssigner;
@@ -35,7 +35,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public void Setup()
         {
-            LinkedStationAssigner = LinkedStationAutoSync.LinkedStationAssigner;
+            LinkedStationAssigner = LinkedWalkingStationController.LinkedStationAssigner;
             LinkedMainController = LinkedStationAssigner.GetLinkedMainController();
             LinkedMainDimensionController = LinkedMainController.GetLinkedDimensionController();
         }
@@ -158,29 +158,37 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             //Assign ownership
             Networking.SetOwner(player: Networking.LocalPlayer, obj: gameObject);
-            Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedStationAutoSync.transform.gameObject);
+            Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedWalkingStationController.transform.gameObject);
 
             //Setup station
-            LinkedStationAutoSync.LinkedVRCStation.PlayerMobility = VRCStation.Mobility.Mobile;
-            LinkedStationAutoSync.LinkedVRCStation.disableStationExit = true;
+            LinkedWalkingStationController.LinkedVRCStation.PlayerMobility = VRCStation.Mobility.Mobile;
+            LinkedWalkingStationController.LinkedVRCStation.disableStationExit = true;
 
             //LinkedStationAssigner.GetLinkedMainController().OutputLogText("Setting up station");
 
-            if (Networking.LocalPlayer.IsValid()) LinkedStationAutoSync.LinkedVRCStation.UseStation(player: Networking.LocalPlayer);
+            LinkedWalkingStationController.transform.position = Networking.LocalPlayer.GetPosition();
+            LinkedWalkingStationController.transform.rotation = Networking.LocalPlayer.GetRotation();
+            
+            if (Networking.LocalPlayer.IsValid())
+            {
+                LinkedStationAssigner.GetLinkedMainController().OutputLogText("Putting player into walking station with player position = " + Networking.LocalPlayer.GetPosition());
+
+                LinkedWalkingStationController.LinkedVRCStation.UseStation(player: Networking.LocalPlayer);
+            }
             else
             {
                 LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("Local player is not yet valid");
             }
 
             //Set states and references
-            LinkedStationAutoSync.LinkedStationAssigner.MyStation = LinkedStationAutoSync;
-            LinkedStationAutoSync.stationState = 0;
+            LinkedWalkingStationController.LinkedStationAssigner.MyStation = LinkedWalkingStationController;
+            LinkedWalkingStationController.stationState = 0;
 
             //Dimension setup
             AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
 
             //Assign transformation helper
-            LinkedStationAutoSync.StationTransformationHelper = LinkedStationAssigner.StationTransformationHelper;
+            LinkedWalkingStationController.StationTransformationHelper = LinkedStationAssigner.StationTransformationHelper;
             LinkedStationAssigner.StationTransformationHelper.parent = AttachedDimension.transform;
 
             //Mark update as complete
@@ -194,7 +202,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             if (AttachedPlayerId == -1)
             {
-                LinkedStationAutoSync.stationState = -1;
+                LinkedWalkingStationController.stationState = -1;
             }
             else if (AttachedPlayerId == Networking.LocalPlayer.playerId)
             {
@@ -203,8 +211,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             else
             {
                 //Always set to stationState 2 = Player is in a different dimension
-                LinkedStationAutoSync.LinkedVRCStation.PlayerMobility = VRCStation.Mobility.Immobilize; //ToDo: Check if Immobilize for vehicle also works
-                LinkedStationAutoSync.stationState = 1;
+                LinkedWalkingStationController.LinkedVRCStation.PlayerMobility = VRCStation.Mobility.Immobilize; //ToDo: Check if Immobilize for vehicle also works
+                LinkedWalkingStationController.stationState = 1;
             }
         }
 
@@ -226,10 +234,10 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                 //Set attached dimension
                 AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
-                if (previousDimensionId == -1) LinkedStationAutoSync.transform.parent = AttachedDimension.transform;
+                if (previousDimensionId == -1) LinkedWalkingStationController.transform.parent = AttachedDimension.transform;
 
                 //Inform Auto sync -> Do parent change in the next auto sync deserialization
-                LinkedStationAutoSync.PlayerIsTransitioning();
+                LinkedWalkingStationController.PlayerIsTransitioning();
             }
         }
 
@@ -245,7 +253,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             if (VRCPlayerApi.GetPlayerById(AttachedPlayerId) != null)
                 returnString += "AttachedPlayerName = " + VRCPlayerApi.GetPlayerById(AttachedPlayerId).displayName + newLine;
 
-            returnString += "Parent of Auto = " + LinkedStationAutoSync.transform.parent.name + newLine;
+            returnString += "Parent of Auto = " + LinkedWalkingStationController.transform.parent.name + newLine;
 
             return returnString;
         }

@@ -17,7 +17,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             if (player == Networking.LocalPlayer)
             {
-                Debug.Log("Entering dimesion");
                 if (LinkedEnterDimension != null) LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController().SetCurrentDimension(LinkedEnterDimension);
             }
         }

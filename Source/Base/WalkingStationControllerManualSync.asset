@@ -54,7 +54,7 @@ MonoBehaviour:
       Data: 
     - Name: $k
       Entry: 1
-      Data: LinkedStationAutoSync
+      Data: LinkedWalkingStationController
     - Name: $v
       Entry: 7
       Data: 2|UdonSharp.Compiler.FieldDefinition, UdonSharp.Editor
@@ -82,10 +82,10 @@ MonoBehaviour:
       Data: VRCUdonUdonBehaviour
     - Name: symbolOriginalName
       Entry: 1
-      Data: LinkedStationAutoSync
+      Data: LinkedWalkingStationController
     - Name: symbolUniqueName
       Entry: 1
-      Data: LinkedStationAutoSync
+      Data: LinkedWalkingStationController
     - Name: symbolDefaultValue
       Entry: 6
       Data: 

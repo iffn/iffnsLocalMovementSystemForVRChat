@@ -6,26 +6,27 @@ using VRC.Udon.Common;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
+    [RequireComponent(typeof(VRCStation))]
     public class WalkingStationController : UdonSharpBehaviour
     {
         //Unity Assignments:
         [SerializeField] public WalkingStationControllerManualSync LinkedStationManualSync;
         [SerializeField] public StationAssignmentController LinkedStationAssigner;
-        [SerializeField] public VRCStation LinkedVRCStation;
 
         //Synced variables:
-        [UdonSynced(UdonSyncMode.Smooth)] public Vector3 LocalPlayerPosition = Vector3.zero;
+        [HideInInspector] [UdonSynced(UdonSyncMode.Smooth)] public Vector3 LocalPlayerPosition = Vector3.zero;
         //[UdonSynced(UdonSyncMode.Smooth)] Quaternion LocalPlayerRotation = Quaternion.identity; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
         [UdonSynced] float LocalPlayerHeading =0; //No special sync mode. Angle lerp calculated manually due to 360 to 0 overflow
 
         //Runtime variables:
+        [HideInInspector] public VRCStation LinkedVRCStation;
         float lastRecievedValue = 0;
         float savedValue = 0;
         float lastSyncTime = 0;
         float timeSinceLastSync; //Used to check serialization frequency
         Vector3 previousPlayerPosition = Vector3.zero;
         Quaternion previousPlayerRotation = Quaternion.identity;
-        public int DeserializationsSinceLastTransition = 0;
+        [HideInInspector] public int DeserializationsSinceLastTransition = 0;
 
         [HideInInspector] public bool StationTransitioning = false;
         bool StationReadyToTransition = true;
@@ -50,10 +51,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         //Functions:
         public void Setup()
         {
+            LinkedVRCStation = (VRCStation)transform.GetComponent(typeof(VRCStation));
+
             //Error checks
             if (LinkedStationManualSync == null)
                 LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("LinkedStationManualSync not assigned in Station " + transform.name);
-            if (LinkedStationManualSync.LinkedStationAutoSync == null)
+            if (LinkedStationManualSync.LinkedWalkingStationController == null)
                 LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("LinkedStationManualSync.LinkedStationAutoSync not assigned in Station " + transform.name);
             if (LinkedVRCStation == null)
                 LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("LinkedVRCStation not assigned in Station " + transform.name);
