@@ -145,7 +145,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         int errors = 0;
 
-        private void Update()
+        void Update()
         {
             if (Time.time - startTime < enterDelay) return;
 
@@ -182,6 +182,34 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
 
             PrepareDebugState();
+        }
+
+        float peakPlayerVelocity = 0;
+        float lastPlayerVelocity = 0;
+        Vector3 lastPosition = Vector3.zero;
+        const float playerVelocityMax = 5.5f; //Run and jump with run speed 4 amd jump impulse 3 = 5.1 m/s
+
+        void FixedUpdate()
+        {
+            Vector3 velocity = Networking.LocalPlayer.GetVelocity();
+            Vector3 velocityNormalized = velocity.normalized;
+            float velocityMagnitude = velocity.magnitude;
+
+            if(velocityMagnitude > playerVelocityMax)
+            {
+                Networking.LocalPlayer.SetVelocity(velocityNormalized * playerVelocityMax);
+
+                lastPosition += velocityNormalized * playerVelocityMax * Time.fixedDeltaTime;
+
+                Networking.LocalPlayer.TeleportTo(lastPosition, Networking.LocalPlayer.GetRotation());
+            }
+            else
+            {
+                lastPosition = Networking.LocalPlayer.GetPosition();
+            }
+
+            lastPlayerVelocity = velocityMagnitude;
+            if (peakPlayerVelocity < lastPlayerVelocity) peakPlayerVelocity = lastPlayerVelocity;
         }
 
         public void PlayerJoined(VRCPlayerApi player)
@@ -290,6 +318,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string name = "StationAssignmentController";
 
             string currentState = "";
+            currentState += "peakPlayerVelocity = " + peakPlayerVelocity + newLine;
+            currentState += "lastPlayerVelocity = " + lastPlayerVelocity + newLine;
+
             currentState += "Local player is owner = " + Networking.IsOwner(gameObject);
 
             for (int i = 0; i < WalkingStationControllers.Length; i++)
