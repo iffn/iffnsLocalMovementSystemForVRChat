@@ -4,6 +4,7 @@ using VRC.SDKBase;
 using VRC.Udon;
 using VRC.Udon.Common;
 using iffnsStuff.iffnsVRCStuff.DebugOutput;
+using iffnsStuff.iffnsVRCStuff.BugFixing;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
@@ -14,6 +15,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] WalkingStationController[] WalkingStationControllers;
         [SerializeField] SingleScriptDebugState LinkedStateOutput;
         [SerializeField] Transform SpawnPoint;
+        [SerializeField] NanLandFixerForPlayer LinkedNanLandFixer;
+
 
         public Transform StationTransformationHelper;
 
@@ -42,10 +45,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         float startTime = 0;
 
         //Variable access
-        public MainDimensionAndStationController GetLinkedMainController()
-        {
-            return LinkedMainController;
-        }
+        public MainDimensionAndStationController GetLinkedMainController() { return LinkedMainController; }
+        public NanLandFixerForPlayer GetLinkedNanLandFixer() { return LinkedNanLandFixer; }
 
         //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
@@ -61,6 +62,10 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 LinkedMainController.OutputLogWarning("Less than 4 stations assigned in StationAssignmentController");
             if (StationTransformationHelper == null)
                 LinkedMainController.OutputLogWarning("StationTransformationHelper not assigned in StationAssignmentController");
+            if (SpawnPoint == null)
+                LinkedMainController.OutputLogWarning("SpawnPoint not assigned in StationAssignmentController");
+            if (LinkedNanLandFixer == null)
+                LinkedMainController.OutputLogWarning("LinkedNanLandFixer not assigned in StationAssignmentController");
 
             //Setup
             //Networking.LocalPlayer.Immobilize(true); //Player is set free, once they join the mobile station
@@ -158,11 +163,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                         if((Networking.LocalPlayer.GetPosition() - SpawnPoint.position).magnitude < 0.1f)
                         {
                             LinkedMainController.SetWorldDimensionAsActiveAndResetPosition();
-                            //LinkedMainController.OutputLogText("Respawn detected. Resetting world");
+                            LinkedMainController.OutputLogText("Respawn detected. Resetting world");
                         }
                         else
                         {
-                            //LinkedMainController.OutputLogText("Station exit detected");
+                            LinkedMainController.OutputLogText("Station exit detected with discance = " + ((Networking.LocalPlayer.GetPosition() - SpawnPoint.position).magnitude));
                         }
 
                         //LinkedMainController.OutputLogText("Player position on walking station reentry = " + Networking.LocalPlayer.GetPosition());
@@ -182,34 +187,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
 
             PrepareDebugState();
-        }
-
-        float peakPlayerVelocity = 0;
-        float lastPlayerVelocity = 0;
-        Vector3 lastPosition = Vector3.zero;
-        const float playerVelocityMax = 5.5f; //Run and jump with run speed 4 amd jump impulse 3 = 5.1 m/s
-
-        void FixedUpdate()
-        {
-            Vector3 velocity = Networking.LocalPlayer.GetVelocity();
-            Vector3 velocityNormalized = velocity.normalized;
-            float velocityMagnitude = velocity.magnitude;
-
-            if(velocityMagnitude > playerVelocityMax)
-            {
-                Networking.LocalPlayer.SetVelocity(velocityNormalized * playerVelocityMax);
-
-                lastPosition += velocityNormalized * playerVelocityMax * Time.fixedDeltaTime;
-
-                Networking.LocalPlayer.TeleportTo(lastPosition, Networking.LocalPlayer.GetRotation());
-            }
-            else
-            {
-                lastPosition = Networking.LocalPlayer.GetPosition();
-            }
-
-            lastPlayerVelocity = velocityMagnitude;
-            if (peakPlayerVelocity < lastPlayerVelocity) peakPlayerVelocity = lastPlayerVelocity;
         }
 
         public void PlayerJoined(VRCPlayerApi player)
@@ -318,8 +295,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string name = "StationAssignmentController";
 
             string currentState = "";
-            currentState += "peakPlayerVelocity = " + peakPlayerVelocity + newLine;
-            currentState += "lastPlayerVelocity = " + lastPlayerVelocity + newLine;
+            currentState += "peakPlayerVelocity = " + LinkedNanLandFixer.GetPeakPlayerVelocity() + newLine;
+            currentState += "lastPlayerVelocity = " + LinkedNanLandFixer.GetLastPlayerVelocity() + newLine;
 
             currentState += "Local player is owner = " + Networking.IsOwner(gameObject);
 

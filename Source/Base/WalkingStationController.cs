@@ -133,7 +133,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                     //transform.localRotation = Quaternion.Euler(Vector3.up * LocalPlayerRotation);
 
-                    float heading = RemapFloat(
+                    float heading = RemapFloatAngle(
                         inputMin: lastSyncTime,
                         inputMax: lastSyncTime + timeSinceLastSync,
                         outputMin: lastRecievedValue,
@@ -194,13 +194,14 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             returnString += "Current owner ID of Auto = " + Networking.GetOwner(gameObject).playerId + newLine;
             returnString += "Current owner ID of Manual = " + Networking.GetOwner(LinkedStationManualSync.gameObject).playerId + newLine;
             returnString += "DeserializationsSinceLastTransition= " + DeserializationsSinceLastTransition + newLine;
+            returnString += "timeSinceLastSync = " + timeSinceLastSync + newLine;
 
             returnString += LinkedStationManualSync.GetCurrentDebugState();
 
             return returnString;
         }
 
-        public float RemapFloat(float inputMin, float inputMax, float outputMin, float outputMax, float inputValue)
+        public float RemapFloatAngle(float inputMin, float inputMax, float outputMin, float outputMax, float inputValue)
         {
             float t = Mathf.InverseLerp(a: inputMin, b: inputMax, value: inputValue);
             return Mathf.LerpAngle(a: outputMin, b: outputMax, t: t);
