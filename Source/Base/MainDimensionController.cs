@@ -97,7 +97,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             //LinkedMainController.OutputLogText("Player position before making the current dimension = " + DimensionTransformationHelper.position);
 
-            CurrentDimension.MakeCurrentDimension(PlayerShouldPeLocation: DimensionTransformationHelper);
+            CurrentDimension.PositionDimensionAsCurrent(PlayerShouldBeLocation: DimensionTransformationHelper);
         }
 
         public void PrepareDebugState()

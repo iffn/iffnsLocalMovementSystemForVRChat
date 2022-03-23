@@ -8,8 +8,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
     public class DimensionController : UdonSharpBehaviour
     {
-        [HideInInspector] [UdonSynced(UdonSyncMode.Smooth)] public Vector3 LocalDimensionPosition = Vector3.zero;
-        [HideInInspector] [UdonSynced(UdonSyncMode.Smooth)] public Quaternion LocalDimensionRotation = Quaternion.identity;
+        [HideInInspector] public Vector3 LocalDimensionPosition = Vector3.zero;
+        [HideInInspector] public Quaternion LocalDimensionRotation = Quaternion.identity;
 
         [SerializeField] DimensionController LinkedDimensionController;
         [SerializeField] MainDimensionController LinkedMainDimensionController;
@@ -117,15 +117,17 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public void MakeCurrentDimension(Transform PlayerShouldPeLocation)
+
+
+        public void PositionDimensionAsCurrent(Transform PlayerShouldBeLocation)
         {
-            PlayerShouldPeLocation.localRotation = LinkedMainDimensionController.GetHeadingRotationFromRotation(PlayerShouldPeLocation.localRotation);
+            PlayerShouldBeLocation.localRotation = LinkedMainDimensionController.GetHeadingRotationFromRotation(PlayerShouldBeLocation.localRotation);
 
-            PlayerShouldPeLocation.parent = LinkedMainDimensionController.transform;
+            PlayerShouldBeLocation.parent = LinkedMainDimensionController.transform;
 
-            transform.parent = PlayerShouldPeLocation;
-            PlayerShouldPeLocation.position = Networking.LocalPlayer.GetPosition();
-            PlayerShouldPeLocation.rotation = Networking.LocalPlayer.GetRotation();
+            transform.parent = PlayerShouldBeLocation;
+            PlayerShouldBeLocation.position = Networking.LocalPlayer.GetPosition();
+            PlayerShouldBeLocation.rotation = Networking.LocalPlayer.GetRotation();
 
             //LinkedMainDimensionController.GetLinkedMainController().OutputLogText("Player position after completion = " + PlayerShouldPeLocation.position);
 
@@ -142,6 +144,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             if (LinkedDimensionController != null) LinkedDimensionController.SetInversedDimensionSetting(inversedDimensionReference: this);
         }
 
+        public void SetAsCurrentDimension()
+        {
+            LinkedMainDimensionController.GetLinkedMainController().SetCurrentDimension(this);
+        }
+
         public string GetCurrentDebugState()
         {
             string returnString = "";
@@ -149,7 +156,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             returnString += "Name = " + transform.name + newLine;
             returnString += "Current dimension = " + (LinkedMainDimensionController.GetCurrentDimension() == this) + newLine;
             returnString += "dimensionNumber = " + dimensionId + newLine;
+            #if !UNITY_EDITOR
             returnString += "Owner = " + Networking.GetOwner(gameObject).playerId + ": " + Networking.GetOwner(gameObject).displayName + newLine;
+            #endif
             returnString += "LocalDimensionPosition = " + LocalDimensionPosition + newLine;
             returnString += "LocalDimensionRotation = " + LocalDimensionRotation.eulerAngles + newLine;
             returnString += "Local position = " + transform.localPosition + newLine;

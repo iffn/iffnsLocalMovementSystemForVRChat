@@ -17,7 +17,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             if (player == Networking.LocalPlayer)
             {
-                if (LinkedEnterDimension != null) LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController().SetCurrentDimension(LinkedEnterDimension);
+                if (LinkedEnterDimension != null) LinkedEnterDimension.SetAsCurrentDimension();
+                //if (LinkedEnterDimension != null) LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController().SetCurrentDimension(LinkedEnterDimension);
             }
         }
 
@@ -25,7 +26,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             if (player == Networking.LocalPlayer)
             {
-                if (LinkedExitDimension != null) LinkedExitDimension.GetLinkedMainDimensionController().GetLinkedMainController().SetCurrentDimension(LinkedExitDimension);
+                if (LinkedExitDimension != null) LinkedExitDimension.SetAsCurrentDimension();
             }
         }
     }

@@ -15,8 +15,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         //Synced variables:
         [HideInInspector] [UdonSynced(UdonSyncMode.Smooth)] public Vector3 LocalPlayerPosition = Vector3.zero;
-        //[UdonSynced(UdonSyncMode.Smooth)] Quaternion LocalPlayerRotation = Quaternion.identity; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
-        [UdonSynced] float LocalPlayerHeading =0; //No special sync mode. Angle lerp calculated manually due to 360 to 0 overflow
+        [UdonSynced(UdonSyncMode.Smooth)] Quaternion LocalPlayerRotation = Quaternion.identity; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
+        //[UdonSynced] float LocalPlayerHeading =0; //No special sync mode. Angle lerp calculated manually due to 360 to 0 overflow
 
         //Runtime variables:
         [HideInInspector] public VRCStation LinkedVRCStation;
@@ -67,13 +67,18 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             //Setup
             LinkedStationManualSync.Setup();
+
+            if (LinkedStationAssigner.DisableUsingPlayerStationsOnStart)
+            {
+                LinkedVRCStation.canUseStationFromStation = false;
+            }
         }
 
         public void ResetStation()
         {
             LocalPlayerPosition = Vector3.zero;
-            //LocalPlayerRotation = Quaternion.identity;
-            LocalPlayerHeading = 0;
+            LocalPlayerRotation = Quaternion.identity;
+            //LocalPlayerHeading = 0;
             stationState = -1;
             previousPlayerPosition = Vector3.zero;
             previousPlayerRotation = Quaternion.identity;
@@ -103,8 +108,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     StationTransformationHelper.rotation = Networking.LocalPlayer.GetRotation();
 
                     LocalPlayerPosition = StationTransformationHelper.localPosition;
-                    //LocalPlayerRotation = StationTransformationHelper.localRotation;
-                    LocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
+                    LocalPlayerRotation = StationTransformationHelper.localRotation;
+                    //LocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
                     break;
 
                 case 1:
@@ -127,12 +132,13 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     else
                     {
                         transform.localPosition = LocalPlayerPosition;
-                        //transform.localRotation = LocalPlayerRotation;
+                        transform.localRotation = LocalPlayerRotation;
                         //ToDo: Calculate heading
                     }
 
                     //transform.localRotation = Quaternion.Euler(Vector3.up * LocalPlayerRotation);
 
+                    /*
                     float heading = RemapFloatAngle(
                         inputMin: lastSyncTime,
                         inputMax: lastSyncTime + timeSinceLastSync,
@@ -141,6 +147,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                         inputValue: Time.time);
 
                     transform.localRotation = Quaternion.Euler(Vector3.up * heading);
+                    */
 
                     break;
             }
@@ -174,7 +181,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             DeserializationsSinceLastTransition++;
 
             lastRecievedValue = savedValue;
-            savedValue = LocalPlayerHeading;
+            savedValue = LocalPlayerRotation.eulerAngles.y;
+            //savedValue = LocalPlayerHeading;
 
             timeSinceLastSync = Time.time - lastSyncTime;
             lastSyncTime = Time.time;
@@ -189,8 +197,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             returnString += "Current station = " + (LinkedStationAssigner.MyStation == this) + newLine;
             returnString += "PlayerMobility = " + LinkedVRCStation.PlayerMobility + newLine;
             returnString += "LocalPlayerPosition = " + LocalPlayerPosition + newLine;
-            //returnString += "LocalPlayerRotation = " + LocalPlayerRotation + newLine;
-            returnString += "LocalPlayerHeading = " + LocalPlayerHeading + newLine;
+            returnString += "LocalPlayerRotation = " + LocalPlayerRotation + newLine;
+            //returnString += "LocalPlayerHeading = " + LocalPlayerHeading + newLine;
             returnString += "Current owner ID of Auto = " + Networking.GetOwner(gameObject).playerId + newLine;
             returnString += "Current owner ID of Manual = " + Networking.GetOwner(LinkedStationManualSync.gameObject).playerId + newLine;
             returnString += "DeserializationsSinceLastTransition= " + DeserializationsSinceLastTransition + newLine;

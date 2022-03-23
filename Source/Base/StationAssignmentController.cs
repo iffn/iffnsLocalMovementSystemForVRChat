@@ -16,6 +16,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] SingleScriptDebugState LinkedStateOutput;
         [SerializeField] Transform SpawnPoint;
         [SerializeField] NanLandFixerForPlayer LinkedNanLandFixer;
+        [SerializeField] public bool DisableUsingPlayerStationsOnStart = true;
 
 
         public Transform StationTransformationHelper;
