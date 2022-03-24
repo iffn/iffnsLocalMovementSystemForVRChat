@@ -28,7 +28,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1064902508110014767}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1064902506851587267
 GameObject:
@@ -43,7 +43,7 @@ GameObject:
   - component: {fileID: 1064902506851587270}
   - component: {fileID: 1064902506851587265}
   m_Layer: 0
-  m_Name: Base
+  m_Name: DummyChair
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -59,7 +59,8 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.25, z: -0.306}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
-  m_Children: []
+  m_Children:
+  - {fileID: 1064902507288485693}
   m_Father: {fileID: 1064902508110014767}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -150,11 +151,11 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1064902507288485692}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.564, z: -0.6179}
-  m_LocalScale: {x: 0.50000006, y: 1.127992, z: 0.1237809}
+  m_LocalPosition: {x: 0, y: 0.6279999, z: -0.6237998}
+  m_LocalScale: {x: 1, y: 2.255984, z: 0.2475618}
   m_Children: []
-  m_Father: {fileID: 1064902508110014767}
-  m_RootOrder: 1
+  m_Father: {fileID: 1064902506851587264}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &1064902507288485680
 MeshFilter:
@@ -244,7 +245,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1064902506851587264}
-  - {fileID: 1064902507288485693}
   - {fileID: 4266316564596463839}
   - {fileID: 5708572238162550286}
   - {fileID: 6690186768297283938}
@@ -282,7 +282,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1064902508110014767}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4330450417621781869
 MonoBehaviour:
@@ -357,7 +357,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1064902508110014767}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &8760492863162708955
 GameObject:
@@ -391,7 +391,7 @@ Transform:
   m_LocalScale: {x: 0.4484601, y: 0.09391205, z: 0.44846028}
   m_Children: []
   m_Father: {fileID: 1064902508110014767}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!33 &7749911391958873944
 MeshFilter:
@@ -466,7 +466,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactTextPlacement: {fileID: 0}
-  interactText: Use
+  interactText: Enter
   interactTextGO: {fileID: 0}
   proximity: 2
   SynchronizePosition: 0

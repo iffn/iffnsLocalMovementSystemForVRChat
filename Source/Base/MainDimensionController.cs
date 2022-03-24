@@ -39,7 +39,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             for (int i = 0; i < Dimensions.Length; i++)
             {
-                Dimensions[i].Setup(dimensionNumber: i);
+                Dimensions[i].Setup(LinkedMainDimensionController: this, dimensionNumber: i);
             }
 
             CurrentDimension = Dimensions[0];

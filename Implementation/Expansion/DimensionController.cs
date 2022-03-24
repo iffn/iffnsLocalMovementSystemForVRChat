@@ -12,7 +12,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [HideInInspector] public Quaternion LocalDimensionRotation = Quaternion.identity;
 
         [SerializeField] DimensionController LinkedDimensionController;
-        [SerializeField] MainDimensionController LinkedMainDimensionController;
+        MainDimensionController LinkedMainDimensionController;
 
         DimensionController InversedDimension;
 
@@ -31,8 +31,10 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             return LinkedMainDimensionController;
         }
 
-        public void Setup(int dimensionNumber)
+        public void Setup(MainDimensionController LinkedMainDimensionController, int dimensionNumber)
         {
+            this.LinkedMainDimensionController = LinkedMainDimensionController;
+
             if ((transform.localScale - Vector3.one).magnitude > 0.0001f)
                 LinkedMainDimensionController.GetLinkedMainController().OutputLogWarning("Error in station " + transform.name + " with ID " + dimensionId + ": Local scale is not (1, 1, 1) but " + transform.localScale);
 
