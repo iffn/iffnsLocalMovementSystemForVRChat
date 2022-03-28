@@ -129,7 +129,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             transform.parent = PlayerShouldBeLocation;
             PlayerShouldBeLocation.position = Networking.LocalPlayer.GetPosition();
-            PlayerShouldBeLocation.rotation = Networking.LocalPlayer.GetRotation();
+            //PlayerShouldBeLocation.rotation = Networking.LocalPlayer.GetRotation();
+            PlayerShouldBeLocation.rotation = LinkedMainDimensionController.GetHeadingRotationFromRotation(Networking.LocalPlayer.GetRotation()); //In case player is in rotated seat during transition
 
             //LinkedMainDimensionController.GetLinkedMainController().OutputLogText("Player position after completion = " + PlayerShouldPeLocation.position);
 
