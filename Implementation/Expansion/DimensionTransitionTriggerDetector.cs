@@ -29,5 +29,15 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 if (LinkedExitDimension != null) LinkedExitDimension.SetAsCurrentDimension();
             }
         }
+
+        public DimensionController GetEntryDimension()
+        {
+            return LinkedEnterDimension;
+        }
+
+        public DimensionController GetExitDimension()
+        {
+            return LinkedExitDimension;
+        }
     }
 }

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: DimensionSyncAngleY
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 11a4ec321a1022f438484ff103e35ce0,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 4f8184c6c63eba54996381dc93622a01,
     type: 2}
   udonAssembly: 
   assemblyError: 

@@ -28,8 +28,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             LinkedLocalStationController.RegisterStationEntry(stationEntry: this); //Currently only 1 available
         }
 
-        
-
         public override void Interact()
         {
             LinkedLocalStationController.UseAttachedStation();
