@@ -119,8 +119,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-
-
         public void PositionDimensionAsCurrent(Transform PlayerShouldBeLocation)
         {
             PlayerShouldBeLocation.localRotation = LinkedMainDimensionController.GetHeadingRotationFromRotation(PlayerShouldBeLocation.localRotation);

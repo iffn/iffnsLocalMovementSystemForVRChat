@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: DimensionSyncAngleQuaternion.asset
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: fedeecc099c5aad4cbf90c634116e04b,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: aa3e9d89c0cd99f469b852c415834d11,
     type: 2}
   udonAssembly: 
   assemblyError: 

@@ -9,11 +9,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
     public class LocalStationController : UdonSharpBehaviour
     {
         //Unity assignments
-        [SerializeField] MainDimensionAndStationController LinkedMainController;
         [SerializeField] DimensionController LinkedEnterDimension;
         [SerializeField] DimensionController LinkedExitDimension;
 
         //Runtime variables
+        MainDimensionAndStationController LinkedMainController;
         StationAssignmentController linkedStationAssignmentController;
         VRCStation linkedVRCStation;
         int attachedPlayerId = -1;
@@ -31,10 +31,17 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
         void Start()
         {
-            if(LinkedMainController == null)
+            if(LinkedEnterDimension != null)
             {
-                Debug.LogWarning(Time.time + ": iffns LocalMovementSystem Assignment problem: LinkedMainController of LocalStationController is not assigned");
-                return;
+                LinkedMainController = LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController();
+            }
+            else if (LinkedExitDimension != null)
+            {
+                LinkedMainController = LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController();
+            }
+            else
+            {
+                Debug.LogWarning(Time.time + ": iffns LocalMovementSystem Assignment problem: Entry and exit dimension of LocalStationController is not assigned in transform " + transform.name + " of parent " + transform.parent.name);
             }
 
             linkedVRCStation = (VRCStation)transform.GetComponent(typeof(VRCStation));
