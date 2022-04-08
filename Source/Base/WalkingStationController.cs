@@ -14,19 +14,23 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] public StationAssignmentController LinkedStationAssigner;
 
         //Synced variables:
-        [HideInInspector] [UdonSynced(UdonSyncMode.Smooth)] public Vector3 LocalPlayerPosition = Vector3.zero;
-        [UdonSynced(UdonSyncMode.Smooth)] Quaternion LocalPlayerRotation = Quaternion.identity; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
+        //[HideInInspector] [UdonSynced(UdonSyncMode.Smooth)] public Vector3 LocalPlayerPosition = Vector3.zero;
+        //[UdonSynced(UdonSyncMode.Smooth)] Quaternion LocalPlayerRotation = Quaternion.identity; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
         //[UdonSynced] float LocalPlayerHeading =0; //No special sync mode. Angle lerp calculated manually due to 360 to 0 overflow
+
+        [UdonSynced] Vector3 SyncedLocalPlayerPosition = Vector3.zero;
+        [UdonSynced] float SyncedLocalPlayerHeading = 0; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
+        [HideInInspector] [UdonSynced] int AttachedDimensionId;
 
         //Runtime variables:
         [HideInInspector] public VRCStation LinkedVRCStation;
         float lastRecievedValue = 0;
-        float savedValue = 0;
-        float lastSyncTime = 0;
-        float timeSinceLastSync; //Used to check serialization frequency
-        Vector3 previousPlayerPosition = Vector3.zero;
-        Quaternion previousPlayerRotation = Quaternion.identity;
-        [HideInInspector] public int DeserializationsSinceLastTransition = 0;
+        float oldSavedValue = 0;
+        float oldLastSyncTime = 0;
+        float oldTimeSinceLastSync; //Used to check serialization frequency
+        Vector3 oldPreviousPlayerPosition = Vector3.zero;
+        Quaternion oldPreviousPlayerRotation = Quaternion.identity;
+        [HideInInspector] public int oldDeserializationsSinceLastTransition = 0;
 
         [HideInInspector] public bool StationTransitioning = false;
         bool StationReadyToTransition = true;
@@ -77,12 +81,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         public void ResetStation()
         {
             LocalPlayerPosition = Vector3.zero;
-            LocalPlayerRotation = Quaternion.identity;
-            //LocalPlayerHeading = 0;
+            //LocalPlayerRotation = Quaternion.identity;
+            LocalPlayerHeading = 0;
             stationState = -1;
-            previousPlayerPosition = Vector3.zero;
-            previousPlayerRotation = Quaternion.identity;
-            DeserializationsSinceLastTransition = 0;
+            oldPreviousPlayerPosition = Vector3.zero;
+            oldPreviousPlayerRotation = Quaternion.identity;
+            oldDeserializationsSinceLastTransition = 0;
             transform.parent = LinkedStationAssigner.transform;
             StationTransitioning = false;
 
@@ -107,8 +111,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     StationTransformationHelper.position = Networking.LocalPlayer.GetPosition(); //2 Errors happen when you leave the world: Ignore
                     StationTransformationHelper.rotation = Networking.LocalPlayer.GetRotation();
 
-                    LocalPlayerPosition = StationTransformationHelper.localPosition;
-                    LocalPlayerRotation = StationTransformationHelper.localRotation;
+                    //LocalPlayerPosition = StationTransformationHelper.localPosition;
+                    //LocalPlayerRotation = StationTransformationHelper.localRotation;
+                    SyncedLocalPlayerPosition = StationTransformationHelper.localPosition;
+                    SyncedLocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
+                    AttachedDimensionId = LinkedStationManualSync.AttachedDimensionId;
                     //LocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
                     break;
 
@@ -117,17 +124,42 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                     //Freeze player during transition due to large coordinate change, which messes with the smooth sync
                     //ToDo: Make transition smooth
-                    if (DeserializationsSinceLastTransition == 1)
+                    if (AttachedDimensionId != previousDimensionID)
+                    {
+                        LinkedStationManualSync.DeserializeDimensionID(newDimensionId: AttachedDimensionId);
+                        previousDimensionID = AttachedDimensionId;
+
+                        LocalPlayerPosition = transform.localPosition;
+                        LocalPlayerHeading = transform.localRotation.eulerAngles.y;
+
+                        Deserialize();
+                    }
+                    else if ((lastSycnedLocalPositionValue - SyncedLocalPlayerPosition).magnitude > 0.001f || Mathf.Abs(lastSyncedLocalPlayerHeading - SyncedLocalPlayerHeading) > 0.01f)
+                    {
+                        Deserialize();
+                    }
+                    else
+                    {
+                        SetCurrentLocalPositionAndRotationValues();
+                    }
+
+                    transform.localPosition = LocalPlayerPosition;
+                    transform.localRotation = Quaternion.Euler(Vector3.up * LocalPlayerHeading);
+                    //transform.localRotation = LocalPlayerRotation;
+
+
+                    /*
+                    if (oldDeserializationsSinceLastTransition == 1)
                     {
                         transform.parent = LinkedStationManualSync.GetAttachedDimension().transform;
 
-                        transform.position = previousPlayerPosition;
-                        transform.rotation = previousPlayerRotation;
+                        transform.position = oldPreviousPlayerPosition;
+                        transform.rotation = oldPreviousPlayerRotation;
                     }
-                    else if (DeserializationsSinceLastTransition == 2)
+                    else if (oldDeserializationsSinceLastTransition == 2)
                     {
-                        transform.position = previousPlayerPosition;
-                        transform.rotation = previousPlayerRotation;
+                        transform.position = oldPreviousPlayerPosition;
+                        transform.rotation = oldPreviousPlayerRotation;
                     }
                     else
                     {
@@ -135,6 +167,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                         transform.localRotation = LocalPlayerRotation;
                         //ToDo: Calculate heading
                     }
+                    */
 
                     //transform.localRotation = Quaternion.Euler(Vector3.up * LocalPlayerRotation);
 
@@ -169,23 +202,146 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
+        bool isTransitioning = false;
+        float transitionStartTime = 0;
+        Vector3 transitionStartPosition = Vector3.zero;
+
         public void PlayerIsTransitioning()
         {
-            DeserializationsSinceLastTransition = 0;
-            previousPlayerPosition = transform.position;
-            previousPlayerRotation = transform.rotation;
+            transform.parent = LinkedStationManualSync.GetAttachedDimension().transform;
+            isTransitioning = true;
+            transitionStartTime = Time.time;
+            transitionStartPosition = SyncedLocalPlayerPosition;
+
+            /*
+            oldDeserializationsSinceLastTransition = 0;
+            oldPreviousPlayerPosition = transform.position;
+            oldPreviousPlayerRotation = transform.rotation;
+            */
         }
+
+        const float deserializationThreshold = 1;
+
+        float lastDeserializationTime = 0;
+        float lastDeserializationDeltaTime = 0;
+
+        Vector3 LocalPlayerPosition = Vector3.zero;
+        Vector3 lastSycnedLocalPositionValue = Vector3.zero;
+        Vector3 lastLocalPositionValue = Vector3.zero;
+        Vector3 localPositionSpeed = Vector3.zero;
+
+        float LocalPlayerHeading = 0;
+        float lastSyncedLocalPlayerHeading = 0;
+        float lastLocalHeadingValue = 0;
+        float localHeadingSpeed = 0;
+        /*
+        Quaternion LocalPlayerRotation = Quaternion.identity;
+        Quaternion SyncedLocalPlayerRotation = Quaternion.identity;
+        Vector4 LocalPlayerRotationV4 = Vector4.zero;
+        Vector4 SyncedLocalPlayerRotationV4 = Vector4.zero;
+        Vector4 lastLocalRotationValueV4 = Vector4.zero;
+        Vector4 localRotationSpeedV4 = Vector4.zero;
+        */
+        float headingOffset = 0;
+
+        void DeserializeDimensionTransition()
+        {
+            //Time
+            lastDeserializationDeltaTime = Time.time - lastDeserializationTime - Time.deltaTime;
+            if (lastDeserializationDeltaTime > deserializationThreshold) lastDeserializationDeltaTime = deserializationThreshold;
+
+            lastDeserializationTime = Time.time;
+
+            //Position
+            lastSycnedLocalPositionValue = SyncedLocalPlayerPosition; //Sync check
+            lastLocalPositionValue = transform.localPosition;
+            localPositionSpeed = (SyncedLocalPlayerPosition - lastLocalPositionValue) / lastDeserializationDeltaTime;
+        }
+
+        void Deserialize()
+        {
+            //Time
+            lastDeserializationDeltaTime = Time.time - lastDeserializationTime - Time.deltaTime;
+            if (lastDeserializationDeltaTime > deserializationThreshold) lastDeserializationDeltaTime = deserializationThreshold;
+
+            lastDeserializationTime = Time.time;
+
+            //Position
+            lastSycnedLocalPositionValue = SyncedLocalPlayerPosition; //Sync check
+            lastLocalPositionValue = LocalPlayerPosition;
+            localPositionSpeed = (SyncedLocalPlayerPosition - lastLocalPositionValue) / lastDeserializationDeltaTime;
+
+            //Rotation
+            if (LocalPlayerHeading > 360) LocalPlayerHeading -= 360;
+            else if (LocalPlayerHeading < 0) LocalPlayerHeading += 360;
+
+            lastSyncedLocalPlayerHeading = SyncedLocalPlayerHeading;
+            lastLocalHeadingValue = LocalPlayerHeading;
+
+            headingOffset = SyncedLocalPlayerHeading - lastLocalHeadingValue;
+
+            if(headingOffset > 180)
+            {
+                headingOffset -= 360;
+            }
+            else if (headingOffset < -180)
+            {
+                headingOffset += 360;
+            }
+
+            localHeadingSpeed = headingOffset / lastDeserializationDeltaTime;
+        }
+
 
         public override void OnDeserialization()
         {
-            DeserializationsSinceLastTransition++;
+            
 
-            lastRecievedValue = savedValue;
-            savedValue = LocalPlayerRotation.eulerAngles.y;
+            
+
+            //old code
+            /*
+            oldDeserializationsSinceLastTransition++;
+
+            lastRecievedValue = oldSavedValue;
+            oldSavedValue = LocalPlayerRotation.eulerAngles.y;
             //savedValue = LocalPlayerHeading;
 
-            timeSinceLastSync = Time.time - lastSyncTime;
-            lastSyncTime = Time.time;
+            oldTimeSinceLastSync = Time.time - oldLastSyncTime;
+            oldLastSyncTime = Time.time;
+            */
+        }
+
+        float currentDeltaTime = 0;
+        int previousDimensionID = 0;
+
+        void SetCurrentLocalPositionAndRotationValues()
+        {
+            currentDeltaTime = Time.time - lastDeserializationTime;
+
+            if (currentDeltaTime < lastDeserializationDeltaTime)
+            {
+                LocalPlayerPosition = lastLocalPositionValue + localPositionSpeed * currentDeltaTime;
+                LocalPlayerHeading = lastLocalHeadingValue + localHeadingSpeed * currentDeltaTime;
+
+                
+                /*
+                LocalPlayerRotationV4 = lastLocalRotationValueV4 + localRotationSpeedV4 * currentDeltaTime;
+
+                LocalPlayerRotation = new Quaternion(
+                    x: localRotationSpeedV4.x,
+                    y: localRotationSpeedV4.y,
+                    z: localRotationSpeedV4.z,
+                    w: localRotationSpeedV4.w
+                    );
+                */
+            }
+            else
+            {
+                LocalPlayerPosition = SyncedLocalPlayerPosition;
+                LocalPlayerHeading = SyncedLocalPlayerHeading;
+                //LocalPlayerRotation = SyncedLocalPlayerRotation;
+            }
         }
 
         public string GetCurrentDebugState()
@@ -196,13 +352,32 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             returnString += "Station name = " + transform.name + newLine;
             returnString += "Current station = " + (LinkedStationAssigner.MyStation == this) + newLine;
             returnString += "PlayerMobility = " + LinkedVRCStation.PlayerMobility + newLine;
+            returnString += "---" + newLine;
+            returnString += "Deserialization offset position = " + (lastSycnedLocalPositionValue - SyncedLocalPlayerPosition).magnitude + newLine;
+            returnString += "Deserialization offset rotation = " + (lastSyncedLocalPlayerHeading - SyncedLocalPlayerHeading) + newLine;
+            returnString += "lastDeserializationTime = " + lastDeserializationTime + newLine;
+            returnString += "lastDeserializationDeltaTime = " + lastDeserializationDeltaTime + newLine;
+            returnString += "currentDeltaTime = " + currentDeltaTime + newLine;
+            returnString += "---" + newLine;
+            returnString += "SyncedLocalPlayerPosition = " + SyncedLocalPlayerPosition + newLine;
+            returnString += "lastSycnedLocalPositionValue = " + lastSycnedLocalPositionValue + newLine;
             returnString += "LocalPlayerPosition = " + LocalPlayerPosition + newLine;
-            returnString += "LocalPlayerRotation = " + LocalPlayerRotation + newLine;
+            returnString += "lastLocalPositionValue = " + lastLocalPositionValue + newLine;
+            returnString += "localPositionSpeed = " + localPositionSpeed + newLine;
+            returnString += "localPositionSpeed.magnitude = " + localPositionSpeed.magnitude + newLine;
+            returnString += "---" + newLine;
+            returnString += "SyncedLocalPlayerHeading = " + SyncedLocalPlayerHeading + newLine;
+            returnString += "lastSyncedLocalPlayerHeading = " + lastSyncedLocalPlayerHeading + newLine;
+            returnString += "LocalPlayerHeading = " + LocalPlayerHeading + newLine;
+            returnString += "lastLocalHeadingValue = " + lastLocalHeadingValue + newLine;
+            returnString += "headingOffset = " + headingOffset + newLine;
+            returnString += "localHeadingSpeed = " + localHeadingSpeed + newLine;
+            returnString += "---" + newLine;
             //returnString += "LocalPlayerHeading = " + LocalPlayerHeading + newLine;
             returnString += "Current owner ID of Auto = " + Networking.GetOwner(gameObject).playerId + newLine;
             returnString += "Current owner ID of Manual = " + Networking.GetOwner(LinkedStationManualSync.gameObject).playerId + newLine;
-            returnString += "DeserializationsSinceLastTransition= " + DeserializationsSinceLastTransition + newLine;
-            returnString += "timeSinceLastSync = " + timeSinceLastSync + newLine;
+            returnString += "DeserializationsSinceLastTransition= " + oldDeserializationsSinceLastTransition + newLine;
+            returnString += "timeSinceLastSync = " + oldTimeSinceLastSync + newLine;
 
             returnString += LinkedStationManualSync.GetCurrentDebugState();
 

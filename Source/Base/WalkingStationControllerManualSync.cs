@@ -19,10 +19,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             return AttachedDimension;
         }
 
-        [HideInInspector] [UdonSynced] public int AttachedDimensionId = 0;
+        [HideInInspector] public /*[UdonSynced]*/ int AttachedDimensionId = 0;
         [HideInInspector] [UdonSynced] public int AttachedPlayerId = -1;
 
-        int previousDimensionId = -1;
         int previousPlayerId = -1;
         bool SetupStationLater = false;
 
@@ -63,7 +62,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public void ResetStation()
         {
-            previousDimensionId = -1;
             previousPlayerId = -1;
             SetupStationLater = false;
             AttachedDimensionId = 0;
@@ -118,6 +116,13 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //RequestSerialization(); //-> Not received by rejoining owner as described above
         }
 
+        public void DeserializeDimensionID(int newDimensionId)
+        {
+            AttachedDimensionId = newDimensionId;
+
+            UpdateDimensionAttachment();
+        }
+
         public override void OnDeserialization()
         {
             //LinkedMainController.OutputLogText("Deserialization called on " + LinkedStationAutoSync.transform.name + " with player ID = " + AttachedPlayerId + " and dimension ID " + AttachedDimensionId);
@@ -129,13 +134,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
             else
             {
-                // If dimension changed
-                if (previousDimensionId != AttachedDimensionId)
-                {
-                    UpdateDimensionAttachment();
-                    previousDimensionId = AttachedDimensionId;
-                }
-
                 // If Player ID changed
                 if (previousPlayerId != AttachedPlayerId)
                 {
@@ -150,8 +148,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             AttachedDimension = newDimension;
             AttachedDimensionId = newDimension.GetDimensionId();
             LinkedStationAssigner.StationTransformationHelper.parent = newDimension.transform;
-
-            RequestSerialization();
+            //RequestSerialization();
         }
 
         public void SetupMyStation()
@@ -192,7 +189,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             LinkedStationAssigner.StationTransformationHelper.parent = AttachedDimension.transform;
 
             //Mark update as complete
-            previousDimensionId = AttachedDimensionId;
             previousPlayerId = AttachedPlayerId;
 
             RequestSerialization();
@@ -218,8 +214,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public void UpdateDimensionAttachment()
         {
-            
-
             if (AttachedPlayerId == -1)
             {
                 //Do nothing
@@ -234,10 +228,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                 //Set attached dimension
                 AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
-                if (previousDimensionId == -1) LinkedWalkingStationController.transform.parent = AttachedDimension.transform;
-
-                //Inform Auto sync -> Do parent change in the next auto sync deserialization
-                LinkedWalkingStationController.PlayerIsTransitioning();
+                LinkedWalkingStationController.transform.parent = AttachedDimension.transform;
             }
         }
 
@@ -246,7 +237,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string returnString = "";
             returnString += "Walking staion manual sync debug:" + newLine;
             returnString += "AttachedDimension = " + AttachedDimensionId + newLine;
-            returnString += "previousDimensionId = " + previousDimensionId + newLine;
             returnString += "AttachedPlayerId = " + AttachedPlayerId + newLine;
             returnString += "previousPlayerId = " + previousPlayerId + newLine;
 
