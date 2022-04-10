@@ -6,7 +6,7 @@ using VRC.Udon;
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
     [UdonBehaviourSyncMode(BehaviourSyncMode.Continuous)]
-    public class DimensionSyncAngleQuaternion : UdonSharpBehaviour
+    public class DimensionSyncAngleQuaternionSmooth : UdonSharpBehaviour
     {
         [UdonSynced(UdonSyncMode.Smooth)] Quaternion RotationSync;
 
