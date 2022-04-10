@@ -31,13 +31,39 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
         void Start()
         {
-            if(LinkedEnterDimension != null)
+            if (LinkedEnterDimension != null)
+            {
+                if(LinkedEnterDimension.GetLinkedMainDimensionController() == null || LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController() == null)
+                {
+                    SendCustomEventDelayedFrames(eventName: nameof(Setup), delayFrames: 1, eventTiming: VRC.Udon.Common.Enums.EventTiming.Update);
+                }
+                else
+                {
+                    Setup();
+                }
+            }
+            else if (LinkedExitDimension != null)
+            {
+                if (LinkedExitDimension.GetLinkedMainDimensionController() == null || LinkedExitDimension.GetLinkedMainDimensionController().GetLinkedMainController() == null)
+                {
+                    SendCustomEventDelayedFrames(eventName: nameof(Setup), delayFrames: 1, eventTiming: VRC.Udon.Common.Enums.EventTiming.Update);
+                }
+                else
+                {
+                    Setup();
+                }
+            }
+        }
+
+        public void Setup()
+        {
+            if (LinkedEnterDimension != null)
             {
                 LinkedMainController = LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController();
             }
             else if (LinkedExitDimension != null)
             {
-                LinkedMainController = LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController();
+                LinkedMainController = LinkedExitDimension.GetLinkedMainDimensionController().GetLinkedMainController();
             }
             else
             {

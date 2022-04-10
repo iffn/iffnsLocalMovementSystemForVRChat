@@ -40,11 +40,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             dimensionId = dimensionNumber;
 
-            if (Networking.IsOwner(gameObject))
-            {
-                LocalDimensionPosition = transform.localPosition;
-                LocalDimensionRotation = transform.localRotation;
-            }
+            LocalDimensionPosition = transform.localPosition;
+            LocalDimensionRotation = transform.localRotation;
         }
 
         void Start()

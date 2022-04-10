@@ -10,9 +10,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] DimensionController LinkedEnterDimension;
         [SerializeField] DimensionController LinkedExitDimension;
 
-        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
-        string newLine = "\n";
-
         public override void OnPlayerTriggerEnter(VRCPlayerApi player)
         {
             if (player == Networking.LocalPlayer)

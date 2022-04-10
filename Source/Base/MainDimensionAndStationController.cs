@@ -119,7 +119,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             wasOwner = Networking.IsOwner(gameObject);
             #endif
 
-
             //Checks
             if (LinkedStationAssigner == null)
                 OutputLogWarning("LinkedStationAssigner is not set in Main controller");

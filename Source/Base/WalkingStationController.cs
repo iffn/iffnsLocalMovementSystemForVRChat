@@ -20,25 +20,35 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         [UdonSynced] Vector3 SyncedLocalPlayerPosition = Vector3.zero;
         [UdonSynced] float SyncedLocalPlayerHeading = 0; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
-        [HideInInspector] [UdonSynced] int AttachedDimensionId;
+        [UdonSynced] int AttachedDimensionId = 0;
 
         //Runtime variables:
         [HideInInspector] public VRCStation LinkedVRCStation;
-        float lastRecievedValue = 0;
-        float oldSavedValue = 0;
-        float oldLastSyncTime = 0;
-        float oldTimeSinceLastSync; //Used to check serialization frequency
-        Vector3 oldPreviousPlayerPosition = Vector3.zero;
-        Quaternion oldPreviousPlayerRotation = Quaternion.identity;
-        [HideInInspector] public int oldDeserializationsSinceLastTransition = 0;
 
-        [HideInInspector] public bool StationTransitioning = false;
-        bool StationReadyToTransition = true;
-        public bool IsStationReadyToTransition()
+        DimensionController AttachedDimension;
+        MainDimensionAndStationController LinkedMainController;
+        MainDimensionController LinkedMainDimensionController;
+
+        public DimensionController GetAttachedDimension()
         {
-            return StationReadyToTransition;
+            return AttachedDimension;
         }
 
+        const float deserializationTimeThreshold = 1;
+        float lastDeserializationTime = 0;
+        float lastDeserializationDeltaTime = 0;
+
+        Vector3 LocalPlayerPosition = Vector3.zero;
+        Vector3 lastSycnedLocalPositionValue = Vector3.zero;
+        Vector3 lastLocalPositionValue = Vector3.zero;
+        Vector3 localPositionSpeed = Vector3.zero;
+
+        float LocalPlayerHeading = 0;
+        float lastSyncedLocalPlayerHeading = 0;
+        float lastLocalHeadingValue = 0;
+        float localHeadingSpeed = 0;
+
+        int previousDimensionID = -1;
 
         [HideInInspector] public Transform StationTransformationHelper;
         [HideInInspector] public int stationState = -1;
@@ -60,8 +70,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //Error checks
             if (LinkedStationManualSync == null)
                 LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("LinkedStationManualSync not assigned in Station " + transform.name);
-            if (LinkedStationManualSync.LinkedWalkingStationController == null)
-                LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("LinkedStationManualSync.LinkedStationAutoSync not assigned in Station " + transform.name);
+            if (LinkedStationManualSync.LinkedWalkingStationController != this)
+                LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("LinkedStationManualSync.LinkedStationAutoSync not correctly assigned in Station " + transform.name);
             if (LinkedVRCStation == null)
                 LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("LinkedVRCStation not assigned in Station " + transform.name);
             if (LinkedVRCStation.stationEnterPlayerLocation == null)
@@ -76,6 +86,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             {
                 LinkedVRCStation.canUseStationFromStation = false;
             }
+            LinkedMainController = LinkedStationAssigner.GetLinkedMainController();
+            LinkedMainDimensionController = LinkedMainController.GetLinkedDimensionController();
         }
 
         public void ResetStation()
@@ -84,12 +96,24 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //LocalPlayerRotation = Quaternion.identity;
             LocalPlayerHeading = 0;
             stationState = -1;
-            oldPreviousPlayerPosition = Vector3.zero;
-            oldPreviousPlayerRotation = Quaternion.identity;
-            oldDeserializationsSinceLastTransition = 0;
             transform.parent = LinkedStationAssigner.transform;
-            StationTransitioning = false;
+            AttachedDimensionId = 0;
 
+
+            lastDeserializationTime = 0;
+            lastDeserializationDeltaTime = 0;
+
+            LocalPlayerPosition = Vector3.zero;
+            lastSycnedLocalPositionValue = Vector3.zero;
+            lastLocalPositionValue = Vector3.zero;
+            localPositionSpeed = Vector3.zero;
+
+            LocalPlayerHeading = 0;
+            lastSyncedLocalPlayerHeading = 0;
+            lastLocalHeadingValue = 0;
+            localHeadingSpeed = 0;
+
+            previousDimensionID = -1;
 
             LinkedStationManualSync.ResetStation();
         }
@@ -115,7 +139,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     //LocalPlayerRotation = StationTransformationHelper.localRotation;
                     SyncedLocalPlayerPosition = StationTransformationHelper.localPosition;
                     SyncedLocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
-                    AttachedDimensionId = LinkedStationManualSync.AttachedDimensionId;
                     //LocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
                     break;
 
@@ -126,7 +149,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     //ToDo: Make transition smooth
                     if (AttachedDimensionId != previousDimensionID)
                     {
-                        LinkedStationManualSync.DeserializeDimensionID(newDimensionId: AttachedDimensionId);
+                        AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
+                        transform.parent = AttachedDimension.transform;
+
                         previousDimensionID = AttachedDimensionId;
 
                         LocalPlayerPosition = transform.localPosition;
@@ -134,7 +159,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                         Deserialize();
                     }
-                    else if ((lastSycnedLocalPositionValue - SyncedLocalPlayerPosition).magnitude > 0.001f || Mathf.Abs(lastSyncedLocalPlayerHeading - SyncedLocalPlayerHeading) > 0.01f)
+                    else if ((lastSycnedLocalPositionValue - SyncedLocalPlayerPosition).magnitude > 0.001f
+                        || Mathf.Abs(lastSyncedLocalPlayerHeading - SyncedLocalPlayerHeading) > 0.01f
+                        || Time.time - lastDeserializationTime > deserializationTimeThreshold)
                     {
                         Deserialize();
                     }
@@ -145,42 +172,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                     transform.localPosition = LocalPlayerPosition;
                     transform.localRotation = Quaternion.Euler(Vector3.up * LocalPlayerHeading);
-                    //transform.localRotation = LocalPlayerRotation;
-
-
-                    /*
-                    if (oldDeserializationsSinceLastTransition == 1)
-                    {
-                        transform.parent = LinkedStationManualSync.GetAttachedDimension().transform;
-
-                        transform.position = oldPreviousPlayerPosition;
-                        transform.rotation = oldPreviousPlayerRotation;
-                    }
-                    else if (oldDeserializationsSinceLastTransition == 2)
-                    {
-                        transform.position = oldPreviousPlayerPosition;
-                        transform.rotation = oldPreviousPlayerRotation;
-                    }
-                    else
-                    {
-                        transform.localPosition = LocalPlayerPosition;
-                        transform.localRotation = LocalPlayerRotation;
-                        //ToDo: Calculate heading
-                    }
-                    */
-
-                    //transform.localRotation = Quaternion.Euler(Vector3.up * LocalPlayerRotation);
-
-                    /*
-                    float heading = RemapFloatAngle(
-                        inputMin: lastSyncTime,
-                        inputMax: lastSyncTime + timeSinceLastSync,
-                        outputMin: lastRecievedValue,
-                        outputMax: LocalPlayerHeading,
-                        inputValue: Time.time);
-
-                    transform.localRotation = Quaternion.Euler(Vector3.up * heading);
-                    */
 
                     break;
             }
@@ -202,67 +193,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        bool isTransitioning = false;
-        float transitionStartTime = 0;
-        Vector3 transitionStartPosition = Vector3.zero;
-
-        public void PlayerIsTransitioning()
-        {
-            transform.parent = LinkedStationManualSync.GetAttachedDimension().transform;
-            isTransitioning = true;
-            transitionStartTime = Time.time;
-            transitionStartPosition = SyncedLocalPlayerPosition;
-
-            /*
-            oldDeserializationsSinceLastTransition = 0;
-            oldPreviousPlayerPosition = transform.position;
-            oldPreviousPlayerRotation = transform.rotation;
-            */
-        }
-
-        const float deserializationThreshold = 1;
-
-        float lastDeserializationTime = 0;
-        float lastDeserializationDeltaTime = 0;
-
-        Vector3 LocalPlayerPosition = Vector3.zero;
-        Vector3 lastSycnedLocalPositionValue = Vector3.zero;
-        Vector3 lastLocalPositionValue = Vector3.zero;
-        Vector3 localPositionSpeed = Vector3.zero;
-
-        float LocalPlayerHeading = 0;
-        float lastSyncedLocalPlayerHeading = 0;
-        float lastLocalHeadingValue = 0;
-        float localHeadingSpeed = 0;
-        /*
-        Quaternion LocalPlayerRotation = Quaternion.identity;
-        Quaternion SyncedLocalPlayerRotation = Quaternion.identity;
-        Vector4 LocalPlayerRotationV4 = Vector4.zero;
-        Vector4 SyncedLocalPlayerRotationV4 = Vector4.zero;
-        Vector4 lastLocalRotationValueV4 = Vector4.zero;
-        Vector4 localRotationSpeedV4 = Vector4.zero;
-        */
-        float headingOffset = 0;
-
-        void DeserializeDimensionTransition()
-        {
-            //Time
-            lastDeserializationDeltaTime = Time.time - lastDeserializationTime - Time.deltaTime;
-            if (lastDeserializationDeltaTime > deserializationThreshold) lastDeserializationDeltaTime = deserializationThreshold;
-
-            lastDeserializationTime = Time.time;
-
-            //Position
-            lastSycnedLocalPositionValue = SyncedLocalPlayerPosition; //Sync check
-            lastLocalPositionValue = transform.localPosition;
-            localPositionSpeed = (SyncedLocalPlayerPosition - lastLocalPositionValue) / lastDeserializationDeltaTime;
-        }
-
         void Deserialize()
         {
             //Time
             lastDeserializationDeltaTime = Time.time - lastDeserializationTime - Time.deltaTime;
-            if (lastDeserializationDeltaTime > deserializationThreshold) lastDeserializationDeltaTime = deserializationThreshold;
+            if (lastDeserializationDeltaTime > deserializationTimeThreshold) lastDeserializationDeltaTime = deserializationTimeThreshold;
 
             lastDeserializationTime = Time.time;
 
@@ -278,7 +213,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             lastSyncedLocalPlayerHeading = SyncedLocalPlayerHeading;
             lastLocalHeadingValue = LocalPlayerHeading;
 
-            headingOffset = SyncedLocalPlayerHeading - lastLocalHeadingValue;
+            float headingOffset = SyncedLocalPlayerHeading - lastLocalHeadingValue;
 
             if(headingOffset > 180)
             {
@@ -295,53 +230,49 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public override void OnDeserialization()
         {
-            
-
-            
-
-            //old code
-            /*
-            oldDeserializationsSinceLastTransition++;
-
-            lastRecievedValue = oldSavedValue;
-            oldSavedValue = LocalPlayerRotation.eulerAngles.y;
-            //savedValue = LocalPlayerHeading;
-
-            oldTimeSinceLastSync = Time.time - oldLastSyncTime;
-            oldLastSyncTime = Time.time;
-            */
+            //Apparently sometimes called at least 1 frame before the values are updated
         }
-
-        float currentDeltaTime = 0;
-        int previousDimensionID = 0;
 
         void SetCurrentLocalPositionAndRotationValues()
         {
-            currentDeltaTime = Time.time - lastDeserializationTime;
+            float currentDeltaTime = Time.time - lastDeserializationTime;
 
             if (currentDeltaTime < lastDeserializationDeltaTime)
             {
                 LocalPlayerPosition = lastLocalPositionValue + localPositionSpeed * currentDeltaTime;
                 LocalPlayerHeading = lastLocalHeadingValue + localHeadingSpeed * currentDeltaTime;
-
-                
-                /*
-                LocalPlayerRotationV4 = lastLocalRotationValueV4 + localRotationSpeedV4 * currentDeltaTime;
-
-                LocalPlayerRotation = new Quaternion(
-                    x: localRotationSpeedV4.x,
-                    y: localRotationSpeedV4.y,
-                    z: localRotationSpeedV4.z,
-                    w: localRotationSpeedV4.w
-                    );
-                */
             }
             else
             {
                 LocalPlayerPosition = SyncedLocalPlayerPosition;
                 LocalPlayerHeading = SyncedLocalPlayerHeading;
-                //LocalPlayerRotation = SyncedLocalPlayerRotation;
             }
+        }
+
+        public void UpdateDimensionAttachment()
+        {
+            if (AttachedDimensionId == -1) return;
+            AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
+            LinkedStationAssigner.StationTransformationHelper.parent = AttachedDimension.transform;
+        }
+
+        //Dimension stuff
+        public void SetAttachedDimensionReference(DimensionController newDimension)
+        {
+            AttachedDimension = newDimension;
+            AttachedDimensionId = newDimension.GetDimensionId();
+            LinkedStationAssigner.StationTransformationHelper.parent = newDimension.transform;
+            //RequestSerialization();
+        }
+
+        public void SetupDimensionAttachment()
+        {
+            //Set dimension
+            AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
+
+            //Assign transformation helper
+            StationTransformationHelper = LinkedStationAssigner.StationTransformationHelper;
+            LinkedStationAssigner.StationTransformationHelper.parent = AttachedDimension.transform;
         }
 
         public string GetCurrentDebugState()
@@ -352,42 +283,23 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             returnString += "Station name = " + transform.name + newLine;
             returnString += "Current station = " + (LinkedStationAssigner.MyStation == this) + newLine;
             returnString += "PlayerMobility = " + LinkedVRCStation.PlayerMobility + newLine;
-            returnString += "---" + newLine;
-            returnString += "Deserialization offset position = " + (lastSycnedLocalPositionValue - SyncedLocalPlayerPosition).magnitude + newLine;
-            returnString += "Deserialization offset rotation = " + (lastSyncedLocalPlayerHeading - SyncedLocalPlayerHeading) + newLine;
-            returnString += "lastDeserializationTime = " + lastDeserializationTime + newLine;
-            returnString += "lastDeserializationDeltaTime = " + lastDeserializationDeltaTime + newLine;
-            returnString += "currentDeltaTime = " + currentDeltaTime + newLine;
-            returnString += "---" + newLine;
+            returnString += "AttachedDimensionId= " + AttachedDimensionId + newLine;
+            if(AttachedDimension != null) returnString += "AttachedDimension name= " + AttachedDimension.transform.name + newLine;
+            returnString += "Parent name = " + transform.parent.name + newLine;
             returnString += "SyncedLocalPlayerPosition = " + SyncedLocalPlayerPosition + newLine;
-            returnString += "lastSycnedLocalPositionValue = " + lastSycnedLocalPositionValue + newLine;
-            returnString += "LocalPlayerPosition = " + LocalPlayerPosition + newLine;
-            returnString += "lastLocalPositionValue = " + lastLocalPositionValue + newLine;
-            returnString += "localPositionSpeed = " + localPositionSpeed + newLine;
-            returnString += "localPositionSpeed.magnitude = " + localPositionSpeed.magnitude + newLine;
-            returnString += "---" + newLine;
             returnString += "SyncedLocalPlayerHeading = " + SyncedLocalPlayerHeading + newLine;
-            returnString += "lastSyncedLocalPlayerHeading = " + lastSyncedLocalPlayerHeading + newLine;
-            returnString += "LocalPlayerHeading = " + LocalPlayerHeading + newLine;
-            returnString += "lastLocalHeadingValue = " + lastLocalHeadingValue + newLine;
-            returnString += "headingOffset = " + headingOffset + newLine;
-            returnString += "localHeadingSpeed = " + localHeadingSpeed + newLine;
-            returnString += "---" + newLine;
-            //returnString += "LocalPlayerHeading = " + LocalPlayerHeading + newLine;
+            if(LinkedStationAssigner.MyStation != this)
+            {
+                returnString += "Time since last location deserialization = " + (Time.time - lastDeserializationDeltaTime) + newLine;
+                returnString += "LocalPlayerPosition = " + LocalPlayerPosition + newLine;
+                returnString += "LocalPlayerHeading = " + LocalPlayerHeading + newLine;
+            }
             returnString += "Current owner ID of Auto = " + Networking.GetOwner(gameObject).playerId + newLine;
             returnString += "Current owner ID of Manual = " + Networking.GetOwner(LinkedStationManualSync.gameObject).playerId + newLine;
-            returnString += "DeserializationsSinceLastTransition= " + oldDeserializationsSinceLastTransition + newLine;
-            returnString += "timeSinceLastSync = " + oldTimeSinceLastSync + newLine;
 
             returnString += LinkedStationManualSync.GetCurrentDebugState();
 
             return returnString;
-        }
-
-        public float RemapFloatAngle(float inputMin, float inputMax, float outputMin, float outputMax, float inputValue)
-        {
-            float t = Mathf.InverseLerp(a: inputMin, b: inputMax, value: inputValue);
-            return Mathf.LerpAngle(a: outputMin, b: outputMax, t: t);
         }
     }
 }

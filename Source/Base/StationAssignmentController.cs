@@ -104,7 +104,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             LinkedMainController.OutputLogText("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Join as fisrt)");
             availableStation.LinkedStationManualSync.AttachedPlayerId = Networking.LocalPlayer.playerId;
-            availableStation.LinkedStationManualSync.AttachedDimensionId = 0;
+            //availableStation.AttachedDimensionId = 0;
 
             availableStation.LinkedStationManualSync.SetupMyStation();
 
@@ -148,8 +148,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             localPlayerIsInStation = false;
         }
-
-        int errors = 0;
 
         void Update()
         {
@@ -233,7 +231,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             {
                 WalkingStationController currentStation = WalkingStationControllers[i];
 
-                if (currentStation.LinkedStationManualSync.AttachedPlayerId == player.playerId)
+                if (currentStation.LinkedStationManualSync.AttachedPlayerId == player.playerId) //Error happens when you leave the world: Ignore
                 {
                     if (Networking.IsOwner(gameObject))
                     {
@@ -284,7 +282,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         public void SetMyDimension(DimensionController newDimension)
         {
             //Update my station number
-            MyStation.LinkedStationManualSync.SetAttachedDimensionReference(newDimension: newDimension);
+            MyStation.SetAttachedDimensionReference(newDimension: newDimension);
         }
 
         public void PrepareDebugState()

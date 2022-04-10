@@ -9,21 +9,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     {
         [SerializeField] public WalkingStationController LinkedWalkingStationController;
 
-        MainDimensionAndStationController LinkedMainController;
         StationAssignmentController LinkedStationAssigner;
-        MainDimensionController LinkedMainDimensionController;
 
-        DimensionController AttachedDimension;
-        public DimensionController GetAttachedDimension()
-        {
-            return AttachedDimension;
-        }
-
-        [HideInInspector] public /*[UdonSynced]*/ int AttachedDimensionId = 0;
         [HideInInspector] [UdonSynced] public int AttachedPlayerId = -1;
 
         int previousPlayerId = -1;
-        bool SetupStationLater = false;
 
         bool requestDelayedSerialization = false;
         float joinTime = 0;
@@ -35,8 +25,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         public void Setup()
         {
             LinkedStationAssigner = LinkedWalkingStationController.LinkedStationAssigner;
-            LinkedMainController = LinkedStationAssigner.GetLinkedMainController();
-            LinkedMainDimensionController = LinkedMainController.GetLinkedDimensionController();
         }
 
         void Start()
@@ -51,20 +39,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 requestDelayedSerialization = false;
                 RequestSerialization();
             }
-
-            if (SetupStationLater && LinkedStationAssigner.MyStation != null)
-            {
-                UpdatePlayerState();
-                UpdateDimensionAttachment();
-                SetupStationLater = false;
-            }
         }
 
         public void ResetStation()
         {
             previousPlayerId = -1;
-            SetupStationLater = false;
-            AttachedDimensionId = 0;
             AttachedPlayerId = -1;
             //LinkedMainController.OutputLogWarning("Setting attached player ID of " + LinkedStationAutoSync.transform.name + " to -1 (Reset)");
         }
@@ -116,13 +95,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //RequestSerialization(); //-> Not received by rejoining owner as described above
         }
 
-        public void DeserializeDimensionID(int newDimensionId)
-        {
-            AttachedDimensionId = newDimensionId;
-
-            UpdateDimensionAttachment();
-        }
-
         public override void OnDeserialization()
         {
             //LinkedMainController.OutputLogText("Deserialization called on " + LinkedStationAutoSync.transform.name + " with player ID = " + AttachedPlayerId + " and dimension ID " + AttachedDimensionId);
@@ -139,16 +111,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 {
                     UpdatePlayerState();
                     previousPlayerId = AttachedPlayerId;
+                    LinkedWalkingStationController.UpdateDimensionAttachment();
                 }
             }
-        }
-
-        public void SetAttachedDimensionReference(DimensionController newDimension)
-        {
-            AttachedDimension = newDimension;
-            AttachedDimensionId = newDimension.GetDimensionId();
-            LinkedStationAssigner.StationTransformationHelper.parent = newDimension.transform;
-            //RequestSerialization();
         }
 
         public void SetupMyStation()
@@ -182,11 +147,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             LinkedWalkingStationController.stationState = 0;
 
             //Dimension setup
-            AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
-
-            //Assign transformation helper
-            LinkedWalkingStationController.StationTransformationHelper = LinkedStationAssigner.StationTransformationHelper;
-            LinkedStationAssigner.StationTransformationHelper.parent = AttachedDimension.transform;
+            LinkedWalkingStationController.SetupDimensionAttachment();
 
             //Mark update as complete
             previousPlayerId = AttachedPlayerId;
@@ -212,38 +173,15 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public void UpdateDimensionAttachment()
-        {
-            if (AttachedPlayerId == -1)
-            {
-                //Do nothing
-            }
-            else if (AttachedPlayerId == Networking.LocalPlayer.playerId)
-            {
-                //Do nothing
-            }
-            else
-            {
-                //LinkedMainController.OutputLogText("Updating dimension attachment of " + transform.name);
-
-                //Set attached dimension
-                AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
-                LinkedWalkingStationController.transform.parent = AttachedDimension.transform;
-            }
-        }
-
         public string GetCurrentDebugState()
         {
             string returnString = "";
             returnString += "Walking staion manual sync debug:" + newLine;
-            returnString += "AttachedDimension = " + AttachedDimensionId + newLine;
             returnString += "AttachedPlayerId = " + AttachedPlayerId + newLine;
             returnString += "previousPlayerId = " + previousPlayerId + newLine;
 
             if (VRCPlayerApi.GetPlayerById(AttachedPlayerId) != null)
                 returnString += "AttachedPlayerName = " + VRCPlayerApi.GetPlayerById(AttachedPlayerId).displayName + newLine;
-
-            returnString += "Parent of Auto = " + LinkedWalkingStationController.transform.parent.name + newLine;
 
             return returnString;
         }
