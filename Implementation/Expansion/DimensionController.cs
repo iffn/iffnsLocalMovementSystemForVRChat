@@ -56,6 +56,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public void UpdatePosition()
         {
+            if(LinkedMainDimensionController == null)
+            {
+                Debug.LogWarning(Time.time + ": Error with Dimension controller of " + transform.name + " -> Setup not complete. Ignore if once since in that case Update of Dimension was called before Start of MainController");
+                return;
+            }
+
             if (LinkedMainDimensionController.GetCurrentDimension() == this) //If current dimension
             {
                 //Don't move dimension
