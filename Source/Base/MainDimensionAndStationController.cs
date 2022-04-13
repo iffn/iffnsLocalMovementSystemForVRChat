@@ -135,7 +135,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             LinkedMainDimensionController.Setup(DimensionTransformationHelper: DimensionTransformationHelper);
 
             #if !UNITY_EDITOR
-            LinkedStationAssigner.Setup();
+            LinkedStationAssigner.Setup(linkedMainController: this);
 
             if (VRCPlayerApi.GetPlayerCount() == 1) //Note: GetPlayerCount seems to be set correctly, while synced variables do not have their correct state yet
             {

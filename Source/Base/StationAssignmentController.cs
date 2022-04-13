@@ -11,7 +11,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     public class StationAssignmentController : UdonSharpBehaviour
     {
         //Unity assignments
-        [SerializeField] MainDimensionAndStationController LinkedMainController;
         [SerializeField] WalkingStationController[] WalkingStationControllers;
         [SerializeField] SingleScriptDebugState LinkedStateOutput;
         [SerializeField] Transform SpawnPoint;
@@ -42,38 +41,41 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         float enterDelay = 2;
 
         //Runtime variables
+        MainDimensionAndStationController linkedMainController;
         bool localPlayerIsInStation = false;
         float startTime = 0;
 
         //Variable access
-        public MainDimensionAndStationController GetLinkedMainController() { return LinkedMainController; }
+        public MainDimensionAndStationController GetLinkedMainController() { return linkedMainController; }
         public NanLandFixerForPlayer GetLinkedNanLandFixer() { return LinkedNanLandFixer; }
 
         //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
 
-        public void Setup()
+        public void Setup(MainDimensionAndStationController linkedMainController)
         {
+            this.linkedMainController = linkedMainController;
+
             startTime = Time.time;
 
             //Error checks
             if (WalkingStationControllers.Length < 1)
-                LinkedMainController.OutputLogWarning("No stations assigned in StationAssignmentController");
+                this.linkedMainController.OutputLogWarning("No stations assigned in StationAssignmentController");
             else if (WalkingStationControllers.Length < 4)
-                LinkedMainController.OutputLogWarning("Less than 4 stations assigned in StationAssignmentController");
+                this.linkedMainController.OutputLogWarning("Less than 4 stations assigned in StationAssignmentController");
             if (StationTransformationHelper == null)
-                LinkedMainController.OutputLogWarning("StationTransformationHelper not assigned in StationAssignmentController");
+                this.linkedMainController.OutputLogWarning("StationTransformationHelper not assigned in StationAssignmentController");
             if (SpawnPoint == null)
-                LinkedMainController.OutputLogWarning("SpawnPoint not assigned in StationAssignmentController");
+                this.linkedMainController.OutputLogWarning("SpawnPoint not assigned in StationAssignmentController");
             if (LinkedNanLandFixer == null)
-                LinkedMainController.OutputLogWarning("LinkedNanLandFixer not assigned in StationAssignmentController");
+                this.linkedMainController.OutputLogWarning("LinkedNanLandFixer not assigned in StationAssignmentController");
 
             //Setup
             //Networking.LocalPlayer.Immobilize(true); //Player is set free, once they join the mobile station
 
             for (int i = 0; i < WalkingStationControllers.Length; i++)
             {
-                if (WalkingStationControllers[i].LinkedStationAssigner == null) LinkedMainController.OutputLogWarning("LinkedStationAssignmentController not set in station " + i + " called " + WalkingStationControllers[i].transform.name);
+                if (WalkingStationControllers[i].LinkedStationAssigner == null) this.linkedMainController.OutputLogWarning("LinkedStationAssignmentController not set in station " + i + " called " + WalkingStationControllers[i].transform.name);
                 WalkingStationControllers[i].Setup();
             }
         }
@@ -102,7 +104,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             if (availableStation == null) return; //Error: Not enough stations
 
-            LinkedMainController.OutputLogText("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Join as fisrt)");
+            linkedMainController.OutputLogText("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Join as fisrt)");
             availableStation.LinkedStationManualSync.AttachedPlayerId = Networking.LocalPlayer.playerId;
             //availableStation.AttachedDimensionId = 0;
 
@@ -161,12 +163,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     {
                         if((Networking.LocalPlayer.GetPosition() - SpawnPoint.position).magnitude < 0.1f)
                         {
-                            LinkedMainController.SetWorldDimensionAsActiveAndResetPosition();
-                            LinkedMainController.OutputLogText("Respawn detected. Resetting world");
+                            linkedMainController.SetWorldDimensionAsActiveAndResetPosition();
+                            linkedMainController.OutputLogText("Respawn detected. Resetting world");
                         }
                         else
                         {
-                            LinkedMainController.OutputLogText("Station exit detected with discance = " + ((Networking.LocalPlayer.GetPosition() - SpawnPoint.position).magnitude));
+                            linkedMainController.OutputLogText("Station exit detected with discance = " + ((Networking.LocalPlayer.GetPosition() - SpawnPoint.position).magnitude));
                         }
 
                         //LinkedMainController.OutputLogText("Player position on walking station reentry = " + Networking.LocalPlayer.GetPosition());
@@ -200,7 +202,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                 if (availableStation == null)
                 {
-                    LinkedMainController.OutputLogError("Not enough stations");
+                    linkedMainController.OutputLogError("Not enough stations");
                     return;
                 }
 
