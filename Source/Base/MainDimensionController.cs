@@ -8,12 +8,14 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
     public class MainDimensionController : UdonSharpBehaviour
     {
-        DimensionController CurrentDimension;
-        [SerializeField] MainDimensionAndStationController LinkedMainController;
+        //Unity assignments
         [SerializeField] DimensionController[] Dimensions;
         [SerializeField] SingleScriptDebugState LinkedStateOutput;
 
+        //Runtime variables
         Transform DimensionTransformationHelper;
+        DimensionController CurrentDimension;
+        MainDimensionAndStationController LinkedMainController;
 
         //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
@@ -35,8 +37,10 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             return Dimensions[index];
         }
 
-        public void Setup(Transform DimensionTransformationHelper)
+        public void Setup(MainDimensionAndStationController linkedMainController, Transform DimensionTransformationHelper)
         {
+            this.LinkedMainController = linkedMainController;
+
             for (int i = 0; i < Dimensions.Length; i++)
             {
                 Dimensions[i].Setup(LinkedMainDimensionController: this, dimensionNumber: i);

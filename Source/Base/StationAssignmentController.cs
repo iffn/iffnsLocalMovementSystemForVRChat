@@ -22,18 +22,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         [HideInInspector] public bool PlayerIsCurrentlyUsingOtherStation = false;
 
-        /*
-        bool playerwasUsingOtherStation = false;
-        bool playerIsCurrentlyUsingOtherStation = false;
-
-        public void PlayerIsCurrentlyUsingOtherStation(bool state)
-        {
-            playerIsCurrentlyUsingOtherStation = state;
-
-            if (!state) playerwasUsingOtherStation = true;
-        }
-        */
-
         //Public variables
         [HideInInspector] public WalkingStationController MyStation;
 
@@ -171,7 +159,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                             linkedMainController.OutputLogText("Station exit detected with discance = " + ((Networking.LocalPlayer.GetPosition() - SpawnPoint.position).magnitude));
                         }
 
-                        //LinkedMainController.OutputLogText("Player position on walking station reentry = " + Networking.LocalPlayer.GetPosition());
                         //Respawn
                         //Activate world dimension
 

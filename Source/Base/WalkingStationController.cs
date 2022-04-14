@@ -50,6 +50,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         int previousDimensionID = -1;
 
+        Transform attachedDimensionTransform;
         [HideInInspector] public Transform StationTransformationHelper;
         [HideInInspector] public int stationState = -1;
         /*
@@ -132,13 +133,17 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     break;
                 case 0:
                     //0 = Station of local player
-                    StationTransformationHelper.position = Networking.LocalPlayer.GetPosition(); //2 Errors happen when you leave the world: Ignore
-                    StationTransformationHelper.rotation = Networking.LocalPlayer.GetRotation();
+
+                    //StationTransformationHelper.position = Networking.LocalPlayer.GetPosition(); //2 Errors happen when you leave the world: Ignore
+                    //StationTransformationHelper.rotation = Networking.LocalPlayer.GetRotation();
 
                     //LocalPlayerPosition = StationTransformationHelper.localPosition;
                     //LocalPlayerRotation = StationTransformationHelper.localRotation;
-                    SyncedLocalPlayerPosition = StationTransformationHelper.localPosition;
-                    SyncedLocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
+                    SyncedLocalPlayerPosition = attachedDimensionTransform.InverseTransformPoint(Networking.LocalPlayer.GetPosition());
+                    SyncedLocalPlayerHeading = (Quaternion.Inverse(attachedDimensionTransform.rotation) * Networking.LocalPlayer.GetRotation()).eulerAngles.y;
+
+                    //SyncedLocalPlayerPosition =  StationTransformationHelper.localPosition;
+                    //SyncedLocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
                     //LocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
                     break;
 
@@ -189,6 +194,10 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             if (player == Networking.LocalPlayer)
             {
+                LinkedMainController.OutputLogText("Player velocity during station exit = " + Networking.LocalPlayer.GetVelocity());
+                     
+                Networking.LocalPlayer.SetVelocity(Vector3.zero);
+
                 LinkedStationAssigner.LocalPlayerExitedStation();
             }
         }
@@ -262,6 +271,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             AttachedDimension = newDimension;
             AttachedDimensionId = newDimension.GetDimensionId();
             LinkedStationAssigner.StationTransformationHelper.parent = newDimension.transform;
+            attachedDimensionTransform = newDimension.transform;    
+            //StationTransformationHelper.parent = newDimension.transform;
             //RequestSerialization();
         }
 
@@ -269,6 +280,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             //Set dimension
             AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
+            attachedDimensionTransform = AttachedDimension.transform;
 
             //Assign transformation helper
             StationTransformationHelper = LinkedStationAssigner.StationTransformationHelper;

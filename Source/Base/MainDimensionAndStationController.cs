@@ -9,18 +9,21 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
     public class MainDimensionAndStationController : UdonSharpBehaviour
     {
+        //Unity assignments
         [SerializeField] MainDimensionController LinkedMainDimensionController;
         [SerializeField] StationAssignmentController LinkedStationAssigner;
         [SerializeField] Transform DimensionTransformationHelper;
         [SerializeField] bool SaveLogText;
         [SerializeField] SingleScriptDebugState LinkedLogOutput;
 
-        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
-        string newLine = "\n";
+        //Runtime variables
         string DebugStringTitle = "iffns LocalMovementSystem ";
         string logText = "";
         public string GetLogText() { return logText; }
         bool wasOwner = false;
+
+        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
+        string newLine = "\n";
 
         /*
         Current test world problems:
@@ -44,14 +47,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 MainDimensionController.transform.position = Networking.LocalPlayer.GetPosition;
                 CurrentDimension.transform.parent = MainDimensionController.parent;
                 UpdateDimensionTilt
-        - Implement stations with custom enter triggers (Since entering stations is disabled because of avatar stations)
         - Allow avatar stations: Differentiate between respawn button and entering a avatar station by measuring the distance -> Also identify dimension transitions of the station player
-        - Allow movement before initialization complete by moving entry point
         - Add moveable (re)spawn point attached to dimensions
 
         Tests to be done:
         -----------------
-        - Smooth vs linear player position sync
         - Check if immobilize (Station) would work better
         - Leave and join behavior
 
@@ -62,7 +62,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         Limitations:
         ------------
-        - Movement of other players not very smooth
+        - Movement of other players not very smooth and delayed
         - Portals are set relative to the world position and will therefore appear in the wrong location for other players
         - Avatar pen drawings will be in weird places when moving in differnet stations
         - Normal VRChat pens would need to be fixed to the current dimension
@@ -126,13 +126,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 OutputLogWarning("LinkedMainDimensionController is not set in Main controller");
             if (DimensionTransformationHelper == null)
                 OutputLogWarning("DimensionTransformationHelper is not set");
-            if (LinkedStationAssigner.GetLinkedMainController() == null)
-                OutputLogWarning("LinkedStationAssigner.GetLinkedMainController is not set");
-            if (LinkedMainDimensionController.GetLinkedMainController() == null)
-                OutputLogWarning("LinkedMainDimensionController.GetLinkedMainController is not set");
 
             //Setup
-            LinkedMainDimensionController.Setup(DimensionTransformationHelper: DimensionTransformationHelper);
+            LinkedMainDimensionController.Setup(linkedMainController: this, DimensionTransformationHelper: DimensionTransformationHelper);
 
             #if !UNITY_EDITOR
             LinkedStationAssigner.Setup(linkedMainController: this);
