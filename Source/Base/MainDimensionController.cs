@@ -16,23 +16,19 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         Transform DimensionTransformationHelper;
         DimensionController CurrentDimension;
         MainDimensionAndStationController LinkedMainController;
-
-        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
 
-        public MainDimensionAndStationController GetLinkedMainController()
-        {
-            return LinkedMainController;
-        }
-
-        public DimensionController GetCurrentDimension()
-        {
-            return CurrentDimension;
-        }
+        public MainDimensionAndStationController GetLinkedMainController() { return LinkedMainController; }
+        public DimensionController GetCurrentDimension() { return CurrentDimension; }
 
         public DimensionController GetDimension(int index)
         {
-            if (Dimensions.Length - 1 < index) return Dimensions[0]; //Error
+            if (Dimensions.Length - 1 < index)
+            {
+                LinkedMainController.OutputLogWarning("Error: Out of scope dimension " + index + " called. Array length = " + Dimensions.Length);
+
+                return Dimensions[0]; //Error
+            }
 
             return Dimensions[index];
         }

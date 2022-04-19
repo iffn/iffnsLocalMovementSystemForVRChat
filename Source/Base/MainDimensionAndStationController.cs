@@ -7,6 +7,63 @@ using iffnsStuff.iffnsVRCStuff.DebugOutput;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
+    /*
+    General information:
+    --------------------
+    - Local movement system made by iffn
+    - GitHub repository: https://github.com/iffn/iffnsLocalMovementSystemForVRChat
+    - How to use guide: https://docs.google.com/presentation/d/1AEL2s8zkA7NxHWXrC2KvhZrL5BJv1oBwBJ77J8YthIY
+    - Class diagram: https://drive.google.com/file/d/1TUnL5gAsZWfoxOLVdrFRFhgGzA1g62VA
+    
+    Written in UdonSharp 0.20.3
+    https://github.com/vrchat-community/UdonSharp
+    - No Enums
+    - No additional class derivatives 
+    - No static fields
+    - Bunch of other C# stuff not supported
+    
+    Current test world problems:
+    ----------------------------
+    - VRC World respawn height not working correctly --> Fall speed results in overshoot
+
+    Stuff to be fixed:
+    ------------------
+    - Going too far down by jumping off a high dimension will mean the player eventually reaches the respawn height
+        - Set the respawn height of the VRCWorldController to -10000
+        - Create a custom respawn script relative to the current dimension that kicks the player out of the station with exit location -10000 -> To be tested
+
+    Future improvements:
+    --------------------
+    - Far away players need to be recentered
+    - Option to keep player vertical if the dimension rotates
+        Use Main dimension controller as player position
+        Use part of the following code:
+            CurrentDimension.transform.parent = null;
+            MainDimensionController.transform.position = Networking.LocalPlayer.GetPosition;
+            CurrentDimension.transform.parent = MainDimensionController.parent;
+            UpdateDimensionTilt
+    - Allow avatar stations: Differentiate between respawn button and entering a avatar station by measuring the distance -> Also identify dimension transitions of the station player
+    - Add moveable (re)spawn point attached to dimensions
+
+    Tests to be done:
+    -----------------
+    - Check if immobilize (Station) would work better
+    - Leave and join behavior
+
+    If bugs occur:
+    --------------
+    - Check debug logs and look out for error messages
+    - Respawn puts the player in the wrong position: Check if the Respawn point in the world dimension is assigned to the VRCWorld prefab -> Does it reset sometimes???
+
+    Limitations:
+    ------------
+    - Movement of other players not very smooth and delayed
+    - Portals are set relative to the world position and will therefore appear in the wrong location for other players
+    - Avatar pen drawings will be in weird places when moving in differnet stations
+    - Normal VRChat pens would need to be fixed to the current dimension
+    - Some avatars have sitting animations that automatically activate when the player is in a station. Mostly for desktop players, Legs for Head&Hand VR players, probably no issue for full body players
+    */
+
     public class MainDimensionAndStationController : UdonSharpBehaviour
     {
         //Unity assignments
@@ -21,53 +78,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         string logText = "";
         public string GetLogText() { return logText; }
         bool wasOwner = false;
-
-        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
-
-        /*
-        Current test world problems:
-        ----------------------------
-        
-
-        Stuff to be fixed:
-        ------------------
-        - Going too far down by jumping off a high dimension will mean the player eventually reaches the respawn height
-            - Set the respawn height of the VRCWorldController to -10000
-            - Create a custom respawn script relative to the current dimension that kicks the player out of the station with exit location -10000 -> To be tested
-        - Smoother dimension transitions for other players -> Currently frozen for 2 deserializations due to the smooth lerp effects during large coordinate jumps
-
-        Future improvements:
-        --------------------
-        - Far away players need to be recentered
-        - Option to keep player vertical if the dimension rotates
-            Use Main dimension controller as player position
-            Use part of the following code:
-                CurrentDimension.transform.parent = null;
-                MainDimensionController.transform.position = Networking.LocalPlayer.GetPosition;
-                CurrentDimension.transform.parent = MainDimensionController.parent;
-                UpdateDimensionTilt
-        - Allow avatar stations: Differentiate between respawn button and entering a avatar station by measuring the distance -> Also identify dimension transitions of the station player
-        - Add moveable (re)spawn point attached to dimensions
-
-        Tests to be done:
-        -----------------
-        - Check if immobilize (Station) would work better
-        - Leave and join behavior
-
-        If bugs occur:
-        --------------
-        - Check debug logs and look out for error messages
-        - Respawn puts the player in the wrong position: Check if the Respawn point in the world dimension is assigned to the VRCWorld prefab -> Does it reset sometimes???
-
-        Limitations:
-        ------------
-        - Movement of other players not very smooth and delayed
-        - Portals are set relative to the world position and will therefore appear in the wrong location for other players
-        - Avatar pen drawings will be in weird places when moving in differnet stations
-        - Normal VRChat pens would need to be fixed to the current dimension
-        - Some avatars have sitting animations that automatically activate when the player is in a station. Mostly for desktop players, Legs for Head&Hand VR players, probably no issue for full body players
-        */
 
         public MainDimensionController GetLinkedDimensionController()
         {

@@ -17,11 +17,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] NanLandFixerForPlayer LinkedNanLandFixer;
         [SerializeField] public bool DisableUsingPlayerStationsOnStart = true;
 
-
-        public Transform StationTransformationHelper;
-
-        [HideInInspector] public bool PlayerIsCurrentlyUsingOtherStation = false;
-
         //Public variables
         [HideInInspector] public WalkingStationController MyStation;
 
@@ -29,16 +24,17 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         float enterDelay = 2;
 
         //Runtime variables
+        public Transform StationTransformationHelper;
+        [HideInInspector] public bool PlayerIsCurrentlyUsingOtherStation = false;
         MainDimensionAndStationController linkedMainController;
         bool localPlayerIsInStation = false;
         float startTime = 0;
+        string newLine = "\n";
 
         //Variable access
         public MainDimensionAndStationController GetLinkedMainController() { return linkedMainController; }
         public NanLandFixerForPlayer GetLinkedNanLandFixer() { return LinkedNanLandFixer; }
 
-        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
-        string newLine = "\n";
 
         public void Setup(MainDimensionAndStationController linkedMainController)
         {
@@ -59,12 +55,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 this.linkedMainController.OutputLogWarning("LinkedNanLandFixer not assigned in StationAssignmentController");
 
             //Setup
-            //Networking.LocalPlayer.Immobilize(true); //Player is set free, once they join the mobile station
-
             for (int i = 0; i < WalkingStationControllers.Length; i++)
             {
-                if (WalkingStationControllers[i].LinkedStationAssigner == null) this.linkedMainController.OutputLogWarning("LinkedStationAssignmentController not set in station " + i + " called " + WalkingStationControllers[i].transform.name);
-                WalkingStationControllers[i].Setup();
+                WalkingStationControllers[i].Setup(LinkedStationAssigner: this);
             }
         }
 
@@ -161,7 +154,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                         //Respawn
                         //Activate world dimension
-
                         MyStation.transform.position = Networking.LocalPlayer.GetPosition();
                         MyStation.transform.rotation = Networking.LocalPlayer.GetRotation();
                         MyStation.LinkedVRCStation.UseStation(Networking.LocalPlayer); //.IsValid()

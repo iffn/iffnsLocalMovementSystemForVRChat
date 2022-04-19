@@ -8,22 +8,18 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
     public class DimensionController : UdonSharpBehaviour
     {
+        //Unity assignments
+        [SerializeField] DimensionController LinkedDimensionController;
+
+        //Runtime variables
         [HideInInspector] public Vector3 LocalDimensionPosition = Vector3.zero;
         [HideInInspector] public Quaternion LocalDimensionRotation = Quaternion.identity;
-
-        [SerializeField] DimensionController LinkedDimensionController;
         MainDimensionController LinkedMainDimensionController;
-
         DimensionController InversedDimension;
-
         int dimensionId;
-
-        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
 
-        public int GetDimensionId()
-        {
-            return dimensionId;
+        public int GetDimensionId() { return dimensionId;
         }
 
         public MainDimensionController GetLinkedMainDimensionController()
@@ -130,19 +126,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             transform.parent = PlayerShouldBeLocation;
             PlayerShouldBeLocation.position = Networking.LocalPlayer.GetPosition();
-            //PlayerShouldBeLocation.rotation = Networking.LocalPlayer.GetRotation();
             PlayerShouldBeLocation.rotation = LinkedMainDimensionController.GetHeadingRotationFromRotation(Networking.LocalPlayer.GetRotation()); //In case player is in rotated seat during transition
 
             //LinkedMainDimensionController.GetLinkedMainController().OutputLogText("Player position after completion = " + PlayerShouldPeLocation.position);
 
             //Set hierarchy
             transform.parent = LinkedMainDimensionController.transform;
-
-            //Reset position
-            /*
-            transform.position = distanceOffset;
-            transform.rotation = angleOffset;
-            */
 
             //Set inversed dimension settings to linked dimensions
             if (LinkedDimensionController != null) LinkedDimensionController.SetInversedDimensionSetting(inversedDimensionReference: this);

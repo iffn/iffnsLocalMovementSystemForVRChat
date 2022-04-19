@@ -11,45 +11,30 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     {
         //Unity Assignments:
         [SerializeField] public WalkingStationControllerManualSync LinkedStationManualSync;
-        [SerializeField] public StationAssignmentController LinkedStationAssigner;
 
         //Synced variables:
-        //[HideInInspector] [UdonSynced(UdonSyncMode.Smooth)] public Vector3 LocalPlayerPosition = Vector3.zero;
-        //[UdonSynced(UdonSyncMode.Smooth)] Quaternion LocalPlayerRotation = Quaternion.identity; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
-        //[UdonSynced] float LocalPlayerHeading =0; //No special sync mode. Angle lerp calculated manually due to 360 to 0 overflow
-
         [UdonSynced] Vector3 SyncedLocalPlayerPosition = Vector3.zero;
         [UdonSynced] float SyncedLocalPlayerHeading = 0; //Currently using Quaternion since heading angle transition from 360 to 0 causes a spin
         [UdonSynced] int AttachedDimensionId = 0;
 
         //Runtime variables:
         [HideInInspector] public VRCStation LinkedVRCStation;
-
+        [HideInInspector] public StationAssignmentController LinkedStationAssigner;
         DimensionController AttachedDimension;
         MainDimensionAndStationController LinkedMainController;
         MainDimensionController LinkedMainDimensionController;
-
-        public DimensionController GetAttachedDimension()
-        {
-            return AttachedDimension;
-        }
-
         const float deserializationTimeThreshold = 1;
         float lastDeserializationTime = 0;
         float lastDeserializationDeltaTime = 0;
-
         Vector3 LocalPlayerPosition = Vector3.zero;
         Vector3 lastSycnedLocalPositionValue = Vector3.zero;
         Vector3 lastLocalPositionValue = Vector3.zero;
         Vector3 localPositionSpeed = Vector3.zero;
-
         float LocalPlayerHeading = 0;
         float lastSyncedLocalPlayerHeading = 0;
         float lastLocalHeadingValue = 0;
         float localHeadingSpeed = 0;
-
         int previousDimensionID = -1;
-
         Transform attachedDimensionTransform;
         [HideInInspector] public Transform StationTransformationHelper;
         [HideInInspector] public int stationState = -1;
@@ -59,13 +44,16 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             0 = Station of local player
             1 = Station of other player
         */
-
-        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
+        
+        //Variable access
+        public DimensionController GetAttachedDimension() { return AttachedDimension; }
 
         //Functions:
-        public void Setup()
+        public void Setup(StationAssignmentController LinkedStationAssigner)
         {
+            this.LinkedStationAssigner = LinkedStationAssigner;
+
             LinkedVRCStation = (VRCStation)transform.GetComponent(typeof(VRCStation));
 
             //Error checks
@@ -94,7 +82,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         public void ResetStation()
         {
             LocalPlayerPosition = Vector3.zero;
-            //LocalPlayerRotation = Quaternion.identity;
             LocalPlayerHeading = 0;
             stationState = -1;
             transform.parent = LinkedStationAssigner.transform;
@@ -134,24 +121,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 case 0:
                     //0 = Station of local player
 
-                    //StationTransformationHelper.position = Networking.LocalPlayer.GetPosition(); //2 Errors happen when you leave the world: Ignore
-                    //StationTransformationHelper.rotation = Networking.LocalPlayer.GetRotation();
-
-                    //LocalPlayerPosition = StationTransformationHelper.localPosition;
-                    //LocalPlayerRotation = StationTransformationHelper.localRotation;
                     SyncedLocalPlayerPosition = attachedDimensionTransform.InverseTransformPoint(Networking.LocalPlayer.GetPosition());
                     SyncedLocalPlayerHeading = (Quaternion.Inverse(attachedDimensionTransform.rotation) * Networking.LocalPlayer.GetRotation()).eulerAngles.y;
-
-                    //SyncedLocalPlayerPosition =  StationTransformationHelper.localPosition;
-                    //SyncedLocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
-                    //LocalPlayerHeading = StationTransformationHelper.localRotation.eulerAngles.y;
                     break;
 
                 case 1:
                     //1 = Station of other player
-
-                    //Freeze player during transition due to large coordinate change, which messes with the smooth sync
-                    //ToDo: Make transition smooth
                     if (AttachedDimensionId != previousDimensionID)
                     {
                         AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
@@ -272,8 +247,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             AttachedDimensionId = newDimension.GetDimensionId();
             LinkedStationAssigner.StationTransformationHelper.parent = newDimension.transform;
             attachedDimensionTransform = newDimension.transform;    
-            //StationTransformationHelper.parent = newDimension.transform;
-            //RequestSerialization();
         }
 
         public void SetupDimensionAttachment()

@@ -7,19 +7,18 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
     public class WalkingStationControllerManualSync : UdonSharpBehaviour
     {
+        //Unity assignments
         [SerializeField] public WalkingStationController LinkedWalkingStationController;
 
-        StationAssignmentController LinkedStationAssigner;
-
+        //Synced variables
         [HideInInspector] [UdonSynced] public int AttachedPlayerId = -1;
-
+        
+        //Runtime variables
+        StationAssignmentController LinkedStationAssigner;
         int previousPlayerId = -1;
-
         bool requestDelayedSerialization = false;
         float joinTime = 0;
         float serializationTimeDelay = 0.5f;
-
-        //newLine = backslash n which is interpreted as a new line when showing the code in a text field
         string newLine = "\n";
 
         public void Setup()
@@ -32,7 +31,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //Use setup instead
         }
 
-        private void Update()
+        void Update()
         {
             if(requestDelayedSerialization && Time.time - joinTime > serializationTimeDelay)
             {
