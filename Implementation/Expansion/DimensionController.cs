@@ -10,17 +10,19 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     {
         //Unity assignments
         [SerializeField] DimensionController LinkedDimensionController;
+        [SerializeField] bool EnableRespawnHeight = false;
+        [SerializeField] float RespawnHeightIfAttached = -90f;
 
         //Runtime variables
         [HideInInspector] public Vector3 LocalDimensionPosition = Vector3.zero;
         [HideInInspector] public Quaternion LocalDimensionRotation = Quaternion.identity;
+        [HideInInspector] public bool isCurrentDimension = false;
         MainDimensionController LinkedMainDimensionController;
         DimensionController InversedDimension;
         int dimensionId;
-        string newLine = "\n";
+        readonly string newLine = "\n";
 
-        public int GetDimensionId() { return dimensionId;
-        }
+        public int GetDimensionId() { return dimensionId; }
 
         public MainDimensionController GetLinkedMainDimensionController()
         {
@@ -48,6 +50,21 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         private void Update()
         {
             UpdatePosition();
+
+            CheckRespawnHeight();
+        }
+
+        void CheckRespawnHeight()
+        {
+            if (!EnableRespawnHeight) return;
+            if (!isCurrentDimension) return;
+
+            if(Networking.LocalPlayer.GetPosition().y - transform.position.y < RespawnHeightIfAttached) //Error happens when you leave the world: Ignore
+            {
+                LinkedMainDimensionController.GetLinkedMainController().OutputLogText("Rewpawning player due to respawn height");
+
+                LinkedMainDimensionController.GetLinkedMainController().GetLinkedStationController().RespawnPlayer();
+            }
         }
 
         public void UpdatePosition()
@@ -147,7 +164,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string returnString = "";
             returnString += "Dimension controller debug:" + newLine;
             returnString += "Name = " + transform.name + newLine;
-            returnString += "Current dimension = " + (LinkedMainDimensionController.GetCurrentDimension() == this) + newLine;
+            returnString += "Current dimension = " + isCurrentDimension + newLine;
             returnString += "dimensionNumber = " + dimensionId + newLine;
             #if !UNITY_EDITOR
             returnString += "Owner = " + Networking.GetOwner(gameObject).playerId + ": " + Networking.GetOwner(gameObject).displayName + newLine;

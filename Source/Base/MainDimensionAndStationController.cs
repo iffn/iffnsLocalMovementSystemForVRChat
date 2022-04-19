@@ -3,7 +3,7 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 using VRC.Udon.Common;
-using iffnsStuff.iffnsVRCStuff.DebugOutput;
+//using iffnsStuff.iffnsVRCStuff.DebugOutput;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
@@ -71,14 +71,13 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] StationAssignmentController LinkedStationAssigner;
         [SerializeField] Transform DimensionTransformationHelper;
         [SerializeField] bool SaveLogText;
-        [SerializeField] SingleScriptDebugState LinkedLogOutput;
+        //[SerializeField] SingleScriptDebugState LinkedLogOutput;
 
         //Runtime variables
+        [HideInInspector] public string LogText = "";
         string DebugStringTitle = "iffns LocalMovementSystem ";
-        string logText = "";
-        public string GetLogText() { return logText; }
         bool wasOwner = false;
-        string newLine = "\n";
+        readonly string newLine = "\n";
 
         public MainDimensionController GetLinkedDimensionController()
         {
@@ -97,11 +96,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string text = Time.time + ": " + DebugStringTitle + DebugStringLog + message;
 
             Debug.Log(text);
-            if (SaveLogText)
-            {
-                logText += text + newLine;
-                SendLogText();
-            }
+            if (SaveLogText) LogText += text + newLine;
         }
 
         public void OutputLogWarning(string message)
@@ -110,8 +105,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             string text = Time.time + ": " + DebugStringTitle + DebugStringLog + message;
 
-            Debug.Log(text);
-            if (SaveLogText) logText += text + newLine;
+            Debug.LogWarning(text);
+            if (SaveLogText) LogText += text + newLine;
         }
 
         public void OutputLogError(string message)
@@ -120,8 +115,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             string text = Time.time + ": " + DebugStringTitle + DebugStringLog + message;
 
-            Debug.Log(text);
-            if (SaveLogText) logText += text + newLine;
+            Debug.LogError(text);
+            if (SaveLogText) LogText += text + newLine;
         }
 
         void Start()
@@ -195,21 +190,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             LinkedStationAssigner.PlayerLeft(player: player);
         }
 
-        public void SendLogText()
-        {
-            if (LinkedLogOutput == null) return;
-
-            string name = "Local movement system log";
-
-            string currentState = logText;
-
-            LinkedLogOutput.SetCurrentState(displayName: name, currentState: currentState);
-        }
-
         public string GetCurrentDebugState()
         {
             string returnString = "";
-            returnString += "Main local movement system debug" + newLine;
 
             returnString += LinkedStationAssigner.GetCurrentDebugState() + newLine;
             returnString += LinkedMainDimensionController.GetCurrentDebugState() + newLine;

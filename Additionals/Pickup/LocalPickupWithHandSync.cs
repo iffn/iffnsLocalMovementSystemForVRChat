@@ -2,7 +2,6 @@
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
-using iffnsStuff.iffnsVRCStuff.DebugOutput;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 {
@@ -26,6 +25,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         int myPlayerId = -1;
         MainDimensionController LinkedDimensionController;
         VRCPlayerApi attachedPlayer;
+        readonly string newLine = "\n";
 
         readonly Quaternion offsetRotation = Quaternion.Euler(new Vector3(0, 90, 90));
 
@@ -50,7 +50,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         {
             if (attachedPlayerID < 1)
             {
-                PrepareDebugState();
                 return;
             }
 
@@ -77,8 +76,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
                 transform.position = attachedPlayer.GetBonePosition(attachedHand);
                 transform.rotation = attachedPlayer.GetBoneRotation(attachedHand) * offsetRotation; //Offset because VRChat is weird
             }
-            
-            PrepareDebugState();
         }
 
         public override void OnPickup()
@@ -150,29 +147,22 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         }
 
         //Debug
-        const string newLine = "\n";
-        [SerializeField] SingleScriptDebugState LinkedStateOutput;
-
-        public void PrepareDebugState()
+        public string GetCurrentDebugState()
         {
-            if (LinkedStateOutput == null) return;
+            string returnString = "";
 
-            if (!LinkedStateOutput.IsReadyForOutput()) return;
+            returnString += "Local pickup with hand sync debug" + newLine;
 
-            string name = "LocalPickupWithHandSync";
+            returnString += "attachedDimensionId = " + attachedDimensionId + newLine;
+            returnString += "attachedPlayerID = " + attachedPlayerID + newLine;
+            returnString += "rightInsteadOfLeftHand = " + rightInsteadOfLeftHand + newLine;
+            returnString += "LocalPositionSync = " + LocalPositionSync + newLine;
+            returnString += "LocalEulerRotationSync = " + LocalEulerRotationSync + newLine;
+            returnString += "myPlayerId = " + myPlayerId + newLine;
+            if (attachedPlayer == null) returnString += "attachedPlayer = null" + newLine;
+            else returnString += "attachedPlayer.id = " + attachedPlayer.playerId + newLine;
 
-            string currentState = "";
-
-            currentState += "attachedDimensionId = " + attachedDimensionId + newLine;
-            currentState += "attachedPlayerID = " + attachedPlayerID + newLine;
-            currentState += "rightInsteadOfLeftHand = " + rightInsteadOfLeftHand + newLine;
-            currentState += "LocalPositionSync = " + LocalPositionSync + newLine;
-            currentState += "LocalEulerRotationSync = " + LocalEulerRotationSync + newLine;
-            currentState += "myPlayerId = " + myPlayerId + newLine;
-            if (attachedPlayer == null) currentState += "attachedPlayer = null" + newLine;
-            else currentState += "attachedPlayer.id = " + attachedPlayer.playerId + newLine;
-
-            LinkedStateOutput.SetCurrentState(displayName: name, currentState: currentState);
+            return returnString;
         }
     }
 }

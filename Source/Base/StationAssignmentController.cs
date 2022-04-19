@@ -3,8 +3,6 @@ using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
 using VRC.Udon.Common;
-using iffnsStuff.iffnsVRCStuff.DebugOutput;
-using iffnsStuff.iffnsVRCStuff.BugFixing;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
@@ -12,9 +10,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     {
         //Unity assignments
         [SerializeField] WalkingStationController[] WalkingStationControllers;
-        [SerializeField] SingleScriptDebugState LinkedStateOutput;
+        //[SerializeField] SingleScriptDebugState LinkedStateOutput;
         [SerializeField] Transform SpawnPoint;
-        [SerializeField] NanLandFixerForPlayer LinkedNanLandFixer;
+        [SerializeField] NanLandFixerForPlayerInLocalMovementSystem LinkedNanLandFixer;
         [SerializeField] public bool DisableUsingPlayerStationsOnStart = true;
 
         //Public variables
@@ -29,11 +27,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         MainDimensionAndStationController linkedMainController;
         bool localPlayerIsInStation = false;
         float startTime = 0;
-        string newLine = "\n";
+        readonly string newLine = "\n";
 
         //Variable access
         public MainDimensionAndStationController GetLinkedMainController() { return linkedMainController; }
-        public NanLandFixerForPlayer GetLinkedNanLandFixer() { return LinkedNanLandFixer; }
+        public NanLandFixerForPlayerInLocalMovementSystem GetLinkedNanLandFixer() { return LinkedNanLandFixer; }
 
 
         public void Setup(MainDimensionAndStationController linkedMainController)
@@ -132,6 +130,15 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             localPlayerIsInStation = false;
         }
 
+        public void RespawnPlayer()
+        {
+            //linkedMainController.SetWorldDimensionAsActiveAndResetPosition();
+
+            Networking.LocalPlayer.TeleportTo(teleportPos: SpawnPoint.position, teleportRot: SpawnPoint.rotation);
+
+            Networking.LocalPlayer.SetVelocity(velocity: Vector3.zero);
+        }
+
         void Update()
         {
             if (Time.time - startTime < enterDelay) return;
@@ -165,9 +172,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     //LinkedMainController.OutputLogWarning("Local player is not in station. Station not yet assigned. Waiting for Deserialization");
                 }
             }
-
-            PrepareDebugState();
         }
+
 
         public void PlayerJoined(VRCPlayerApi player)
         {
@@ -181,7 +187,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                 if (availableStation == null)
                 {
-                    linkedMainController.OutputLogError("Not enough stations");
+                    linkedMainController.OutputLogWarning("Not enough stations");
                     return;
                 }
 
@@ -266,37 +272,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             MyStation.SetAttachedDimensionReference(newDimension: newDimension);
         }
 
-        public void PrepareDebugState()
-        {
-            if (LinkedStateOutput == null) return;
-
-            if (!LinkedStateOutput.IsReadyForOutput()) return;
-
-            string name = "StationAssignmentController";
-
-            string currentState = "";
-            currentState += "peakPlayerVelocity = " + LinkedNanLandFixer.GetPeakPlayerVelocity() + newLine;
-            currentState += "lastPlayerVelocity = " + LinkedNanLandFixer.GetLastPlayerVelocity() + newLine;
-
-            currentState += "Local player is owner = " + Networking.IsOwner(gameObject);
-
-            for (int i = 0; i < WalkingStationControllers.Length; i++)
-            {
-                //if (i < 5)
-                if (WalkingStationControllers[i].LinkedStationManualSync.AttachedPlayerId > 0)
-                {
-                    currentState += WalkingStationControllers[i].GetCurrentDebugState();
-                    currentState += "Station enabled = " + WalkingStationControllers[i].enabled + newLine;
-                    currentState += newLine;
-                }
-            }
-
-            LinkedStateOutput.SetCurrentState(displayName: name, currentState: currentState);
-        }
-
         public string GetCurrentDebugState()
         {
             string returnString = "";
+            returnString += "peakPlayerVelocity = " + LinkedNanLandFixer.GetPeakPlayerVelocity() + newLine;
+            returnString += "lastPlayerVelocity = " + LinkedNanLandFixer.GetLastPlayerVelocity() + newLine;
             returnString += "Station assignment controller debug at " + Time.time + newLine;
             returnString += "Local player is owner = " + Networking.IsOwner(gameObject);
 

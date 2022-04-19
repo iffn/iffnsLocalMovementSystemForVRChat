@@ -44,7 +44,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             0 = Station of local player
             1 = Station of other player
         */
-        string newLine = "\n";
+        readonly string newLine = "\n";
         
         //Variable access
         public DimensionController GetAttachedDimension() { return AttachedDimension; }
@@ -69,7 +69,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 LinkedStationAssigner.GetLinkedMainController().OutputLogWarning("LinkedVRCStation.ExitLocation not assigned in Station " + transform.name);
 
             //Setup
-            LinkedStationManualSync.Setup();
+            LinkedStationManualSync.Setup(LinkedWalkingStationController: this);
 
             if (LinkedStationAssigner.DisableUsingPlayerStationsOnStart)
             {
@@ -86,7 +86,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             stationState = -1;
             transform.parent = LinkedStationAssigner.transform;
             AttachedDimensionId = 0;
-
 
             lastDeserializationTime = 0;
             lastDeserializationDeltaTime = 0;
@@ -121,7 +120,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 case 0:
                     //0 = Station of local player
 
-                    SyncedLocalPlayerPosition = attachedDimensionTransform.InverseTransformPoint(Networking.LocalPlayer.GetPosition());
+                    SyncedLocalPlayerPosition = attachedDimensionTransform.InverseTransformPoint(Networking.LocalPlayer.GetPosition()); //Error happens when you leave the world: Ignore
                     SyncedLocalPlayerHeading = (Quaternion.Inverse(attachedDimensionTransform.rotation) * Networking.LocalPlayer.GetRotation()).eulerAngles.y;
                     break;
 
@@ -275,7 +274,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             returnString += "SyncedLocalPlayerHeading = " + SyncedLocalPlayerHeading + newLine;
             if(LinkedStationAssigner.MyStation != this)
             {
-                returnString += "Time since last location deserialization = " + (Time.time - lastDeserializationDeltaTime) + newLine;
+                returnString += "Time since last location deserialization = " + (Time.time - lastDeserializationTime) + newLine;
+                returnString += "Time since last deserialization delta time= " + (Time.time - lastDeserializationDeltaTime) + newLine;
                 returnString += "LocalPlayerPosition = " + LocalPlayerPosition + newLine;
                 returnString += "LocalPlayerHeading = " + LocalPlayerHeading + newLine;
             }

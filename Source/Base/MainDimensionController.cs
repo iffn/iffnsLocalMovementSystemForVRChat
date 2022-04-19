@@ -2,7 +2,6 @@
 using UnityEngine;
 using VRC.SDKBase;
 using VRC.Udon;
-using iffnsStuff.iffnsVRCStuff.DebugOutput;
 
 namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
@@ -10,13 +9,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     {
         //Unity assignments
         [SerializeField] DimensionController[] Dimensions;
-        [SerializeField] SingleScriptDebugState LinkedStateOutput;
 
         //Runtime variables
         Transform DimensionTransformationHelper;
         DimensionController CurrentDimension;
         MainDimensionAndStationController LinkedMainController;
-        string newLine = "\n";
+        readonly string newLine = "\n";
 
         public MainDimensionAndStationController GetLinkedMainController() { return LinkedMainController; }
         public DimensionController GetCurrentDimension() { return CurrentDimension; }
@@ -43,6 +41,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
 
             CurrentDimension = Dimensions[0];
+            CurrentDimension.isCurrentDimension = true;
 
             this.DimensionTransformationHelper = DimensionTransformationHelper;
         }
@@ -50,11 +49,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         void Start()
         {
             //Use setup instead
-        }
-
-        void Update()
-        {
-            PrepareDebugState();
         }
 
         public Quaternion GetHeadingRotationFromRotation(Quaternion rotation)
@@ -93,29 +87,13 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             for (int i = 0; i < Dimensions.Length; i++)
             {
                 Dimensions[i].UpdatePosition();
+                Dimensions[i].isCurrentDimension = false;
             }
 
             //LinkedMainController.OutputLogText("Player position before making the current dimension = " + DimensionTransformationHelper.position);
 
             CurrentDimension.PositionDimensionAsCurrent(PlayerShouldBeLocation: DimensionTransformationHelper);
-        }
-
-        public void PrepareDebugState()
-        {
-            if (LinkedStateOutput == null) return;
-
-            if (!LinkedStateOutput.IsReadyForOutput()) return;
-
-            string name = "MainDimensionController";
-
-            string currentState = "";
-
-            for (int i = 0; i < Dimensions.Length; i++)
-            {
-                currentState += Dimensions[i].GetCurrentDebugState() + newLine;
-            }
-
-            LinkedStateOutput.SetCurrentState(displayName: name, currentState: currentState);
+            CurrentDimension.isCurrentDimension = true;
         }
 
         public string GetCurrentDebugState()

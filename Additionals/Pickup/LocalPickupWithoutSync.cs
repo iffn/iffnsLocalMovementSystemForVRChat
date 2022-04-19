@@ -33,11 +33,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             }
         }
 
-
         public override void OnDrop()
         {
             DimensionController attachedDimension = LinkedDimensionController.GetCurrentDimension();
             transform.parent = attachedDimension.transform;
         }
+
+
     }
 }
