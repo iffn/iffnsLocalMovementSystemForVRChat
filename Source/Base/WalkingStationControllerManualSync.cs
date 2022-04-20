@@ -41,6 +41,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public void ResetAndSyncStation()
         {
+            LinkedStationAssigner.GetLinkedMainController().OutputLogText("Resetting station " + transform.name + " of player ID " + AttachedPlayerId);
+
             if (!Networking.IsOwner(gameObject)) Networking.SetOwner(player: Networking.LocalPlayer, obj: gameObject);
             if (!Networking.IsOwner(LinkedWalkingStationController.gameObject)) Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedWalkingStationController.gameObject);
 

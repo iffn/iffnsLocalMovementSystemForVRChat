@@ -263,7 +263,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             string returnString = "";
             returnString += "Walking staion debug:" + newLine;
-
+            returnString += "Current time = " + Time.time + newLine;
             returnString += "Station name = " + transform.name + newLine;
             returnString += "Current station = " + (LinkedStationAssigner.MyStation == this) + newLine;
             returnString += "PlayerMobility = " + LinkedVRCStation.PlayerMobility + newLine;

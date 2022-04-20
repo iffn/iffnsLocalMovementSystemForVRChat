@@ -35,6 +35,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
     Future improvements:
     --------------------
+    - Encapsulate stuff
     - Far away players need to be recentered
     - Option to keep player vertical if the dimension rotates
         Use Main dimension controller as player position
@@ -76,6 +77,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         //Runtime variables
         [HideInInspector] public string LogText = "";
+        uint logLines = 0;
+        uint oldLogLines = 0;
+        readonly uint maxLogLines = 200;
         string DebugStringTitle = "iffns LocalMovementSystem ";
         bool wasOwner = false;
         readonly string newLine = "\n";
@@ -97,7 +101,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string text = Time.time + ": " + DebugStringTitle + DebugStringLog + message;
 
             Debug.Log(text);
-            if (SaveLogText) LogText += text + newLine;
+            if (SaveLogText)
+            {
+                LogText += text + newLine;
+                logLines++;
+                CheckLogLines();
+            }
         }
 
         public void OutputLogWarning(string message)
@@ -107,7 +116,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string text = Time.time + ": " + DebugStringTitle + DebugStringLog + message;
 
             Debug.LogWarning(text);
-            if (SaveLogText) LogText += text + newLine;
+            if (SaveLogText)
+            {
+                LogText += text + newLine;
+                logLines++;
+                CheckLogLines();
+            }
         }
 
         public void OutputLogError(string message)
@@ -117,7 +131,22 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string text = Time.time + ": " + DebugStringTitle + DebugStringLog + message;
 
             Debug.LogError(text);
-            if (SaveLogText) LogText += text + newLine;
+            if (SaveLogText)
+            {
+                LogText += text + newLine;
+                logLines++;
+                CheckLogLines();
+            }
+        }
+
+        void CheckLogLines()
+        {
+            if(logLines > maxLogLines)
+            {
+                oldLogLines += logLines;
+                logLines = 0;
+                LogText = "--> Reset log lines at " + Time.time + " with " + oldLogLines + " lines removed";
+            }
         }
 
         void Start()

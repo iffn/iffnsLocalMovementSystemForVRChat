@@ -174,37 +174,69 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
+        public override void OnPlayerJoined(VRCPlayerApi player)
+        {
+            
+        }
+
+        
+
         public void PlayerJoined(VRCPlayerApi player) //ToDo: Encapsulate
         {
-            if (Networking.IsOwner(gameObject)) //Only run this function for the owner
+            if (!Networking.IsOwner(gameObject)) return; //Only run this function for the owner
+
+            CheckEachStationValidity(); //Check each station validity in case one was set incorrectly
+
+            //linkedMainController.OutputLogText("Player joined with ID " + player.playerId);
+
+            WalkingStationController availableStation = NextAvailableStation();
+
+            if (availableStation == null)
             {
-                //linkedMainController.OutputLogText("Player joined with ID " + player.playerId);
-
-                WalkingStationController availableStation = NextAvailableStation();
-
-                //linkedMainController.OutputLogText("Serched for available station");
-
-                if (availableStation == null)
-                {
-                    linkedMainController.OutputLogWarning("Not enough stations");
-                    return;
-                }
-
-                availableStation.enabled = true;
-
-                //linkedMainController.OutputLogText("Available station found called " + availableStation.transform.name);
-
-                //linkedMainController.OutputLogWarning("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Other player joined)");
-
-                if (!Networking.IsOwner(availableStation.LinkedStationManualSync.gameObject))
-                    Networking.SetOwner(player: Networking.LocalPlayer, obj: availableStation.LinkedStationManualSync.gameObject);
-
-                availableStation.LinkedStationManualSync.AttachedPlayerId = player.playerId;
-
-                availableStation.LinkedStationManualSync.RequestSerializationOnThis();
-
-                //linkedMainController.OutputLogText("Completed assignment from owner");
+                linkedMainController.OutputLogWarning("Not enough stations");
+                return;
             }
+
+            availableStation.enabled = true;
+
+            //linkedMainController.OutputLogText("Available station found called " + availableStation.transform.name);
+
+            //linkedMainController.OutputLogWarning("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Other player joined)");
+
+            if (!Networking.IsOwner(availableStation.LinkedStationManualSync.gameObject))
+                Networking.SetOwner(player: Networking.LocalPlayer, obj: availableStation.LinkedStationManualSync.gameObject);
+
+            availableStation.LinkedStationManualSync.AttachedPlayerId = player.playerId;
+
+            availableStation.LinkedStationManualSync.RequestSerializationOnThis();
+
+            //linkedMainController.OutputLogText("Completed assignment from owner");
+        }
+
+        void CheckEachStationValidity()
+        {
+            foreach (WalkingStationController station in WalkingStationControllers)
+            {
+                int playerId = station.LinkedStationManualSync.AttachedPlayerId;
+
+                if (playerId == 0) continue;
+
+                if (VRCPlayerApi.GetPlayerById(playerId) == null) //If outdated station
+                {
+                    linkedMainController.OutputLogWarning("Reset station called during cleanup. Player ID = " + playerId + " in station " + station.transform.name);
+
+                    ResetStation(station: station);
+                }
+            }
+        }
+
+        void ResetStation(WalkingStationController station)
+        {
+            station.LinkedStationManualSync.ResetAndSyncStation();
+
+            station.ResetStation();
+
+            station.enabled = false;
         }
 
         public void ResetAndSyncStation(VRCPlayerApi player) //ToDo: Encapsulate
@@ -215,11 +247,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                 if (currentStation.LinkedStationManualSync.AttachedPlayerId != player.playerId) continue; //Error happens when you leave the world: Ignore
 
-                currentStation.LinkedStationManualSync.ResetAndSyncStation();
-
-                currentStation.ResetStation();
-
-                currentStation.enabled = false;
+                ResetStation(station: currentStation);
 
                 linkedMainController.OutputLogText("Reset station called " + currentStation.transform.name);
 
@@ -257,10 +285,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         public string GetCurrentDebugState()
         {
             string returnString = "";
+            returnString += "Current time = " + Time.time + newLine;
             returnString += "peakPlayerVelocity = " + LinkedNanLandFixer.GetPeakPlayerVelocity() + newLine;
             returnString += "lastPlayerVelocity = " + LinkedNanLandFixer.GetLastPlayerVelocity() + newLine;
             returnString += "Local player is owner = " + Networking.IsOwner(gameObject) + newLine;
-
+            
             returnString += newLine;
 
             for (int i = 0; i < WalkingStationControllers.Length; i++)

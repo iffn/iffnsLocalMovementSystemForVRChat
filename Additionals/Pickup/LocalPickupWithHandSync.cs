@@ -151,7 +151,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         {
             string returnString = "";
 
-            returnString += "Local pickup with hand sync debug" + newLine;
+            returnString += "Local pickup with hand sync debug:" + newLine;
 
             returnString += "attachedDimensionId = " + attachedDimensionId + newLine;
             returnString += "attachedPlayerID = " + attachedPlayerID + newLine;

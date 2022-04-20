@@ -16,6 +16,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         MainDimensionController LinkedDimensionController;
         VRC_Pickup linkedPickup;
 
+        //Fixed variables
+        readonly string newLine = "\n";
 
         void Start()
         {
@@ -39,6 +41,18 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             transform.parent = attachedDimension.transform;
         }
 
+        //Debug
+        public string GetCurrentDebugState()
+        {
+            string returnString = "";
 
+            returnString += "Local pickup without sync debug:" + newLine;
+
+            returnString += "Parent = " + transform.parent.name + newLine;
+            returnString += "Local position = " + transform.localPosition + newLine;
+            returnString += "Local rotation = " + transform.localRotation.eulerAngles + newLine;
+
+            return returnString;
+        }
     }
 }
