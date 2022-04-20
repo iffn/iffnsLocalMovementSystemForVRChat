@@ -8,12 +8,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     public class WalkingStationControllerManualSync : UdonSharpBehaviour
     {
         //Synced variables
-        [HideInInspector] [UdonSynced] public int AttachedPlayerId = -1;
+        [HideInInspector] [UdonSynced] public int AttachedPlayerId = 0;
         
         //Runtime variables
         [HideInInspector] public WalkingStationController LinkedWalkingStationController;
         StationAssignmentController LinkedStationAssigner;
-        int previousPlayerId = -1;
+        int previousPlayerId = 0;
         bool requestDelayedSerialization = false;
         float joinTime = 0;
         float serializationTimeDelay = 0.5f;
@@ -39,12 +39,23 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
+        public void ResetAndSyncStation()
+        {
+            if (!Networking.IsOwner(gameObject)) Networking.SetOwner(player: Networking.LocalPlayer, obj: gameObject);
+            if (!Networking.IsOwner(LinkedWalkingStationController.gameObject)) Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedWalkingStationController.gameObject);
+
+            AttachedPlayerId = 0;
+
+            RequestSerialization();
+        }
+
+        
         public void ResetStation()
         {
-            previousPlayerId = -1;
-            AttachedPlayerId = -1;
+            previousPlayerId = 0;
             //LinkedMainController.OutputLogWarning("Setting attached player ID of " + LinkedStationAutoSync.transform.name + " to -1 (Reset)");
         }
+        
 
         public void RequestSerializationOnThis()
         {
@@ -155,9 +166,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public void UpdatePlayerState()
         {
-            if (AttachedPlayerId == -1)
+            if (AttachedPlayerId == 0)
             {
-                LinkedWalkingStationController.stationState = -1;
+                LinkedWalkingStationController.ResetStation();
             }
             else if (AttachedPlayerId == Networking.LocalPlayer.playerId)
             {

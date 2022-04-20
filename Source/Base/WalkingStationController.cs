@@ -267,6 +267,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             returnString += "Station name = " + transform.name + newLine;
             returnString += "Current station = " + (LinkedStationAssigner.MyStation == this) + newLine;
             returnString += "PlayerMobility = " + LinkedVRCStation.PlayerMobility + newLine;
+            returnString += "stationState = " + stationState + newLine;
             returnString += "AttachedDimensionId= " + AttachedDimensionId + newLine;
             if(AttachedDimension != null) returnString += "AttachedDimension name= " + AttachedDimension.transform.name + newLine;
             returnString += "Parent name = " + transform.parent.name + newLine;

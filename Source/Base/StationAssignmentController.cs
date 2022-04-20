@@ -106,7 +106,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             foreach(WalkingStationController controller in WalkingStationControllers)
             {
-                if(controller.LinkedStationManualSync.AttachedPlayerId < 1)
+                if(controller.LinkedStationManualSync.AttachedPlayerId == 0)
                 {
                     controller.enabled = false;
                 }
@@ -169,21 +169,19 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 }
                 else
                 {
-                    //LinkedMainController.OutputLogWarning("Local player is not in station. Station not yet assigned. Waiting for Deserialization");
+                    //linkedMainController.OutputLogWarning("Local player is not in station. Station not yet assigned. Waiting for Deserialization");
                 }
             }
         }
-
-
         public void PlayerJoined(VRCPlayerApi player)
         {
             if (Networking.IsOwner(gameObject)) //Only run this function for the owner
             {
-                //LinkedMainController.OutputLogText("Player joined with ID " + player.playerId);
+                //linkedMainController.OutputLogText("Player joined with ID " + player.playerId);
 
                 WalkingStationController availableStation = NextAvailableStation();
 
-                //LinkedMainController.OutputLogText("Serched for available station");
+                //linkedMainController.OutputLogText("Serched for available station");
 
                 if (availableStation == null)
                 {
@@ -193,9 +191,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                 availableStation.enabled = true;
 
-                //LinkedMainController.OutputLogText("Available station found called " + availableStation.transform.name);
+                //linkedMainController.OutputLogText("Available station found called " + availableStation.transform.name);
 
-                //LinkedMainController.OutputLogWarning("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Other player joined)");
+                //linkedMainController.OutputLogWarning("Setting attached player ID of " + availableStation.transform.name + " to " + Networking.LocalPlayer.playerId + "(Other player joined)");
 
                 if (!Networking.IsOwner(availableStation.LinkedStationManualSync.gameObject))
                     Networking.SetOwner(player: Networking.LocalPlayer, obj: availableStation.LinkedStationManualSync.gameObject);
@@ -204,44 +202,27 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
                 availableStation.LinkedStationManualSync.RequestSerializationOnThis();
 
-                //LinkedMainController.OutputLogText("Completed assignment from owner");
+                //linkedMainController.OutputLogText("Completed assignment from owner");
             }
         }
 
-        public void PlayerLeft(VRCPlayerApi player)
+        public void ResetAndSyncStation(VRCPlayerApi player)
         {
-            //LinkedMainController.OutputLogText("Player left with ID " + player.playerId);
-
-            WalkingStationController abandonedStation = null;
-
             for (int i = 0; i < WalkingStationControllers.Length; i++)
             {
                 WalkingStationController currentStation = WalkingStationControllers[i];
 
-                if (currentStation.LinkedStationManualSync.AttachedPlayerId == player.playerId) //Error happens when you leave the world: Ignore
-                {
-                    if (Networking.IsOwner(gameObject))
-                    {
-                        Networking.SetOwner(player: Networking.LocalPlayer, obj: currentStation.gameObject);
-                        Networking.SetOwner(player: Networking.LocalPlayer, obj: currentStation.LinkedStationManualSync.gameObject);
-                    }
+                if (currentStation.LinkedStationManualSync.AttachedPlayerId != player.playerId) continue; //Error happens when you leave the world: Ignore
 
-                    currentStation.ResetStation();
+                currentStation.LinkedStationManualSync.ResetAndSyncStation();
 
-                    abandonedStation = currentStation;
+                currentStation.ResetStation();
 
-                    //LinkedMainController.OutputLogText("Reset station called " + currentStation.transform.name);
+                currentStation.enabled = false;
 
-                    break;
-                }
-            }
+                linkedMainController.OutputLogText("Reset station called " + currentStation.transform.name);
 
-            if (Networking.IsOwner(gameObject)) //Only run this function for the owner
-            {
-                if(abandonedStation != null)
-                {
-                    abandonedStation.enabled = false;
-                }
+                break;
             }
         }
 
@@ -258,7 +239,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             {
                 WalkingStationController currentController = WalkingStationControllers[i];
 
-                if (currentController.LinkedStationManualSync.AttachedPlayerId == -1)
+                if (currentController.LinkedStationManualSync.AttachedPlayerId == 0)
                 {
                     return currentController;
                 }
@@ -277,13 +258,14 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             string returnString = "";
             returnString += "peakPlayerVelocity = " + LinkedNanLandFixer.GetPeakPlayerVelocity() + newLine;
             returnString += "lastPlayerVelocity = " + LinkedNanLandFixer.GetLastPlayerVelocity() + newLine;
-            returnString += "Station assignment controller debug at " + Time.time + newLine;
-            returnString += "Local player is owner = " + Networking.IsOwner(gameObject);
+            returnString += "Local player is owner = " + Networking.IsOwner(gameObject) + newLine;
+
+            returnString += newLine;
 
             for (int i = 0; i < WalkingStationControllers.Length; i++)
             {
-                //if (i < 5)
                 if (WalkingStationControllers[i].LinkedStationManualSync.AttachedPlayerId > 0)
+                //if (i < 5)
                 {
                     returnString += WalkingStationControllers[i].GetCurrentDebugState();
                     returnString += "Station enabled = " + WalkingStationControllers[i].enabled + newLine;

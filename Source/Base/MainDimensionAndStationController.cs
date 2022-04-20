@@ -179,15 +179,18 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public override void OnPlayerLeft(VRCPlayerApi player)
         {
-            if(Networking.IsOwner(gameObject) && !wasOwner)
+            if(Networking.IsOwner(gameObject))
             {
-                OutputLogText("Transfering ownership to of MainDimensionAndStationController to myself");
-                wasOwner = true;
-                Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedStationAssigner.gameObject);
-                Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedMainDimensionController.gameObject);
-            }
+                if (!wasOwner)
+                {
+                    OutputLogText("Transfering ownership to of MainDimensionAndStationController to myself");
+                    wasOwner = true;
+                    Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedStationAssigner.gameObject);
+                    Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedMainDimensionController.gameObject);
+                }
 
-            LinkedStationAssigner.PlayerLeft(player: player);
+                LinkedStationAssigner.ResetAndSyncStation(player: player);
+            }
         }
 
         public string GetCurrentDebugState()
