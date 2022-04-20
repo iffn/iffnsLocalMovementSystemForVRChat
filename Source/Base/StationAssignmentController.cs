@@ -77,7 +77,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //Use setup instead
         }
 
-        public void JoinAsFirstPlayer()
+        public void JoinAsFirstPlayer() //ToDo: Encapsulate
         {
             WalkingStationController availableStation = NextAvailableStation();
 
@@ -113,7 +113,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public void JoinAsFollowingPlayer()
+        public void JoinAsFollowingPlayer() //ToDo: Encapsulate
         {
             //Do nothing in here
             enterDelay = 2;
@@ -173,7 +173,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 }
             }
         }
-        public void PlayerJoined(VRCPlayerApi player)
+
+        public void PlayerJoined(VRCPlayerApi player) //ToDo: Encapsulate
         {
             if (Networking.IsOwner(gameObject)) //Only run this function for the owner
             {
@@ -206,7 +207,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public void ResetAndSyncStation(VRCPlayerApi player)
+        public void ResetAndSyncStation(VRCPlayerApi player) //ToDo: Encapsulate
         {
             for (int i = 0; i < WalkingStationControllers.Length; i++)
             {
@@ -226,7 +227,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public override void OnOwnershipTransferred(VRCPlayerApi player)
+        public override void OnOwnershipTransferred(VRCPlayerApi player) //ToDo: Encapsulate
         {
             if (player != Networking.LocalPlayer) return;
 
@@ -247,7 +248,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             return null;
         }
 
-        public void SetMyDimension(DimensionController newDimension)
+        public void SetMyDimension(DimensionController newDimension) //ToDo: Encapsulate
         {
             //Update my station number
             MyStation.SetAttachedDimensionReference(newDimension: newDimension);

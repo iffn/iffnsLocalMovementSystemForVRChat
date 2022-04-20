@@ -9,7 +9,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     {
         //Synced variables
         [HideInInspector] [UdonSynced] public int AttachedPlayerId = 0;
-        
+
         //Runtime variables
         [HideInInspector] public WalkingStationController LinkedWalkingStationController;
         StationAssignmentController LinkedStationAssigner;

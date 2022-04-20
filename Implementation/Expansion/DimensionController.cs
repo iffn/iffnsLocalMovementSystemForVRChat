@@ -47,7 +47,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //Use setup instead
         }
 
-        private void Update()
+        void Update()
         {
             UpdatePosition();
 
@@ -67,7 +67,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public void UpdatePosition()
+        public void UpdatePosition() //ToDo: Encapsulate
         {
             if(LinkedMainDimensionController == null)
             {
@@ -104,7 +104,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             transform.localRotation = inverseLocalRotation;
         }
 
-        public void SetInversedDimensionSetting(DimensionController inversedDimensionReference) //Set and reset this during dimension change
+        //Set and reset this during dimension change
+        public void SetInversedDimensionSetting(DimensionController inversedDimensionReference) //ToDo: Encapsulate
         {
             //Set hierarchy
             transform.parent = inversedDimensionReference.transform;
@@ -118,7 +119,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public void ResetInversedDimensionSetting() //Reset this during dimension change
+        //Reset this during dimension change
+        public void ResetInversedDimensionSetting() //ToDo: Encapsulate
         {
             InversedDimension = null;
 
@@ -135,7 +137,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public void PositionDimensionAsCurrent(Transform PlayerShouldBeLocation)
+        public void PositionDimensionAsCurrent(Transform PlayerShouldBeLocation) //ToDo: Encapsulate
         {
             PlayerShouldBeLocation.localRotation = LinkedMainDimensionController.GetHeadingRotationFromRotation(PlayerShouldBeLocation.localRotation);
 

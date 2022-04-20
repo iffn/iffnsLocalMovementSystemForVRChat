@@ -10,7 +10,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     public class WalkingStationController : UdonSharpBehaviour
     {
         //Unity Assignments:
-        [SerializeField] public WalkingStationControllerManualSync LinkedStationManualSync;
+        [SerializeField] public WalkingStationControllerManualSync LinkedStationManualSync; //ToDo: Encapsulate
 
         //Synced variables:
         [UdonSynced] Vector3 SyncedLocalPlayerPosition = Vector3.zero;
@@ -79,7 +79,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             LinkedMainDimensionController = LinkedMainController.GetLinkedDimensionController();
         }
 
-        public void ResetStation()
+        public void ResetStation() //ToDo: Encapsulate
         {
             LocalPlayerPosition = Vector3.zero;
             LocalPlayerHeading = 0;
@@ -232,7 +232,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        public void UpdateDimensionAttachment()
+        public void UpdateDimensionAttachment() //ToDo: Encapsulate
         {
             if (AttachedDimensionId == -1) return;
             AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);
@@ -240,7 +240,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         }
 
         //Dimension stuff
-        public void SetAttachedDimensionReference(DimensionController newDimension)
+        public void SetAttachedDimensionReference(DimensionController newDimension) //ToDo: Encapsulate
         {
             AttachedDimension = newDimension;
             AttachedDimensionId = newDimension.GetDimensionId();
@@ -248,7 +248,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             attachedDimensionTransform = newDimension.transform;    
         }
 
-        public void SetupDimensionAttachment()
+        public void SetupDimensionAttachment() //ToDo: Encapsulate
         {
             //Set dimension
             AttachedDimension = LinkedMainDimensionController.GetDimension(AttachedDimensionId);

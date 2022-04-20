@@ -18,7 +18,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     Written in UdonSharp 0.20.3
     https://github.com/vrchat-community/UdonSharp
     - No Enums
-    - No additional class derivatives 
+    - No new class derivatives 
+    - No Get Set Properties
     - No static fields
     - Bunch of other C# stuff not supported
     
@@ -150,7 +151,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             #endif
         }
 
-        public void SetWorldDimensionAsActiveAndResetPosition()
+        public void SetWorldDimensionAsActiveAndResetPosition() //ToDo: Encapsulate
         {
             DimensionController worldDimension = LinkedMainDimensionController.GetDimension(0);
 
