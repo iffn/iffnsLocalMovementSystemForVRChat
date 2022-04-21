@@ -145,7 +145,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             {
                 oldLogLines += logLines;
                 logLines = 0;
-                LogText = "--> Reset log lines at " + Time.time + " with " + oldLogLines + " lines removed";
+                LogText = "--> Reset log lines at " + Time.time + " with a total of " + oldLogLines + " lines removed";
             }
         }
 
