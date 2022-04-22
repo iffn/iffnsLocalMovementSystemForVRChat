@@ -8,6 +8,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     public class MainDimensionController : UdonSharpBehaviour
     {
         //Unity assignments
+        [Header("Add all Dimensions here")]
+        [Tooltip("Add all dimesions here. The world dimension is already added in the Prefab")]
         [SerializeField] DimensionController[] Dimensions;
 
         //Runtime variables

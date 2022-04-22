@@ -69,10 +69,14 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     public class MainDimensionAndStationController : UdonSharpBehaviour
     {
         //Unity assignments
+        [Header("To be set manually")]
+        [Tooltip("Links to the Main dimension controller")]
         [SerializeField] MainDimensionController LinkedMainDimensionController;
+        [Tooltip("Enable if the log test should be saved. Can be accessed using the LogText value")]
+        [SerializeField] bool SaveLogText;
+        [Header("Already set in the prefab")]
         [SerializeField] StationAssignmentController LinkedStationAssigner;
         [SerializeField] Transform DimensionTransformationHelper;
-        [SerializeField] bool SaveLogText;
         //[SerializeField] SingleScriptDebugState LinkedLogOutput;
 
         //Runtime variables

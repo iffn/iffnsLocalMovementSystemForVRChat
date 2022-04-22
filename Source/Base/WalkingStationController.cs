@@ -10,6 +10,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     public class WalkingStationController : UdonSharpBehaviour
     {
         //Unity Assignments:
+        [Header("Already set in the prefab")]
         [SerializeField] public WalkingStationControllerManualSync LinkedStationManualSync; //ToDo: Encapsulate
 
         //Synced variables:

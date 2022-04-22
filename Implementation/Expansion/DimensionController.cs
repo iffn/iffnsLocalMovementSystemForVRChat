@@ -9,8 +9,13 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     public class DimensionController : UdonSharpBehaviour
     {
         //Unity assignments
+        [Header("To be set manually. None for World Dimension")]
+        [Tooltip("Links to the parent dimension. None in the World Dimension")]
         [SerializeField] DimensionController LinkedDimensionController;
+        [Header("To be set manually")]
+        [Tooltip("Enable if the player should respawn in this dimension. Usually only for world dimension")]
         [SerializeField] bool EnableRespawnHeight = false;
+        [Tooltip("Respawn heigh relative to this Transform if the player is attached to it")]
         [SerializeField] float RespawnHeightIfAttached = -90f;
 
         //Runtime variables

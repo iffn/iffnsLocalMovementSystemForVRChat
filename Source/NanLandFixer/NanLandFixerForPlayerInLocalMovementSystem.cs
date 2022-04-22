@@ -7,6 +7,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 {
     public class NanLandFixerForPlayerInLocalMovementSystem : UdonSharpBehaviour
     {
+        [Header("Already set in the prefab")]
         [SerializeField] MainDimensionAndStationController LinkedMainDimensionAndStationController;
 
         //Settings

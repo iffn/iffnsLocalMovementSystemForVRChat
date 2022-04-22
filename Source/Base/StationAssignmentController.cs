@@ -9,7 +9,10 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     public class StationAssignmentController : UdonSharpBehaviour
     {
         //Unity assignments
+        [Header("For potential expansion")]
+        [Tooltip("Copy paste more Station controllers and assign them here depending on your max player count. Note: Every player needs a station!")]
         [SerializeField] WalkingStationController[] WalkingStationControllers;
+        [Header("Already set in the prefab")]
         //[SerializeField] SingleScriptDebugState LinkedStateOutput;
         [SerializeField] Transform SpawnPoint;
         [SerializeField] NanLandFixerForPlayerInLocalMovementSystem LinkedNanLandFixer;
