@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: SkyboxDerotator
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 6bff5a5eff6441043afadc6629ce245e,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 19e3d2bc79c68fc4ba020905db664442,
     type: 2}
   udonAssembly: 
   assemblyError: 
