@@ -56,6 +56,10 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             UpdatePosition();
 
+            #if UNITY_EDITOR
+            return;
+            #endif
+
             CheckRespawnHeight();
         }
 
