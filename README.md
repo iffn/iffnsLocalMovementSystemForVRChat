@@ -7,6 +7,8 @@
 ### How to use guide:
 https://docs.google.com/presentation/d/1AEL2s8zkA7NxHWXrC2KvhZrL5BJv1oBwBJ77J8YthIY
 
+### Unity package download:
+https://github.com/iffn/iffnsLocalMovementSystemForVRChat/releases
 
 ### Integration without Submodules
 To maintain compatability with other projects, please put everything into ```/Assets/iffnsStuff/iffnsLocalMovementSystemForVRChat``` 
