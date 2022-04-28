@@ -161,11 +161,20 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             //Checks
             if (LinkedStationAssigner == null)
+            {
                 OutputLogWarning("LinkedStationAssigner is not set in Main controller");
+                return;
+            }
             if (LinkedMainDimensionController == null)
+            {
                 OutputLogWarning("LinkedMainDimensionController is not set in Main controller");
+                return;
+            }
             if (DimensionTransformationHelper == null)
+            {
                 OutputLogWarning("DimensionTransformationHelper is not set");
+                return;
+            }
 
             //Setup
             LinkedMainDimensionController.Setup(linkedMainController: this, DimensionTransformationHelper: DimensionTransformationHelper);

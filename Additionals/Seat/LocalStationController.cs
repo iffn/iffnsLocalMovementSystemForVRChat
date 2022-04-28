@@ -29,6 +29,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             LinkedStationEntry = stationEntry;
         }
 
+        public void SetLinkedDimensionsIfNotAlreadySet(DimensionController linkedDimension)
+        {
+            if (LinkedEnterDimension == null) LinkedEnterDimension = linkedDimension;
+            if (LinkedExitDimension == null) LinkedExitDimension = linkedDimension;
+        }
+
         void Start()
         {
             if (LinkedEnterDimension != null)

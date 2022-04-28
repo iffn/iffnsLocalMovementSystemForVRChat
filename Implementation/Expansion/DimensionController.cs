@@ -34,6 +34,20 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             return LinkedMainDimensionController;
         }
 
+        public DimensionController GetLinkedDimensionController()
+        {
+            return LinkedDimensionController;
+        }
+
+        public void SetLinkedDimensionControllerIfNotAlreadySet(DimensionController linkedDimensionController)
+        {
+            if (this.LinkedDimensionController != null) return;
+
+            this.LinkedDimensionController = linkedDimensionController;
+
+            transform.parent = LinkedDimensionController.transform;
+        }
+
         public void Setup(MainDimensionController LinkedMainDimensionController, int dimensionNumber)
         {
             this.LinkedMainDimensionController = LinkedMainDimensionController;
@@ -76,11 +90,18 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
+        int errorCount = 0;
+
         public void UpdatePosition() //ToDo: Encapsulate
         {
             if(LinkedMainDimensionController == null)
             {
-                Debug.LogWarning(Time.time + ": Error with Dimension controller of " + transform.name + " -> Setup not complete. Ignore if once since in that case Update of Dimension was called before Start of MainController");
+                if(errorCount == 1) // Ignore the first error since the Update was probably called before the setup is completed
+                {
+                    Debug.LogWarning(Time.time + ": Error with Dimension controller of " + transform.name + " -> Setup not complete.");
+                }
+                errorCount++;
+
                 return;
             }
 

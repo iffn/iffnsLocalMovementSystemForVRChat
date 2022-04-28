@@ -10,6 +10,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [SerializeField] DimensionController LinkedEnterDimension;
         [SerializeField] DimensionController LinkedExitDimension;
 
+        public void SetOtherDimensionTransitionIfNotAlreadySet(DimensionController linkedDimension)
+        {
+            if (LinkedEnterDimension == null) LinkedEnterDimension = linkedDimension;
+            else if(LinkedExitDimension == null) LinkedExitDimension = linkedDimension;
+        }
+
         public override void OnPlayerTriggerEnter(VRCPlayerApi player)
         {
             if (player == Networking.LocalPlayer)

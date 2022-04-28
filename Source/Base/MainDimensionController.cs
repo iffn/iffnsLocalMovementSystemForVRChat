@@ -11,6 +11,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         [Header("Add all Dimensions here")]
         [Tooltip("Add all dimesions here. The world dimension is already added in the Prefab")]
         [SerializeField] DimensionController[] Dimensions;
+        [SerializeField] DimensionPrefabOrganizer[] PrefabOrganizers;
 
         //Runtime variables
         Transform DimensionTransformationHelper;
@@ -33,10 +34,68 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             return Dimensions[index];
         }
 
+        DimensionController[] CombineArray(DimensionController[] FirstArray, DimensionController[] SecondArray)
+        {
+            int[] doublePositions = new int[SecondArray.Length];
+            int doubleCount = 0;
+
+            for(int i = 0; i< SecondArray.Length; i++)
+            {
+                DimensionController currentController = SecondArray[i];
+
+                bool isDouble = false;
+
+                foreach(DimensionController controller in FirstArray)
+                {
+                    if(controller == currentController)
+                    {
+                        doublePositions[doubleCount] = i;
+                        doubleCount++;
+                        LinkedMainController.OutputLogWarning("Detected double dimension assignment in Main Dimension controller regarding " + controller.transform.name + ". Fixing now.");
+                        isDouble = true;
+                        break;
+                    }
+
+                }
+
+                if(!isDouble) doublePositions[i] = -1;
+            }
+
+            DimensionController[] returnArray = new DimensionController[FirstArray.Length + SecondArray.Length - doubleCount];
+
+            for (int i = 0; i < FirstArray.Length; i++)
+            {
+                returnArray[i] = FirstArray[i];
+            }
+
+            int doubleSkips = 0;
+
+            for (int i = 0; i < SecondArray.Length; i++)
+            {
+                if(doublePositions[i] == -1)
+                {
+                    returnArray[FirstArray.Length + i - doubleSkips] = SecondArray[i];
+                }
+                else
+                {
+                    doubleSkips++;
+                }
+            }
+
+            return returnArray;
+        }
+
         public void Setup(MainDimensionAndStationController linkedMainController, Transform DimensionTransformationHelper)
         {
             this.LinkedMainController = linkedMainController;
 
+            foreach (DimensionPrefabOrganizer organizer in PrefabOrganizers)
+            {
+                organizer.Setup();
+
+                Dimensions = CombineArray(Dimensions, organizer.GetLinkedDimensions());
+            }
+            
             for (int i = 0; i < Dimensions.Length; i++)
             {
                 Dimensions[i].Setup(LinkedMainDimensionController: this, dimensionNumber: i);
