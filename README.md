@@ -1,7 +1,9 @@
 # iffnsLocalMovementSystemForVRChat
- A system that allows players to walk on and transition between moving objects in VRChat. 
+A system that allows players to walk on and transition between moving objects in VRChat. 
  
- Requires VRChat SDK3 for Worlds, the compatible Unity version and UdonSharp 0.20.3 or higher.
+Requires VRChat SDK3 for Worlds, the compatible Unity version and UdonSharp 0.20.3 or higher.
+
+The demo world is available here: https://vrchat.com/home/world/wrld_59005cf7-d488-47e2-bb7b-13474a6604f2
 
 ## How to use
 ### How to use guide:
