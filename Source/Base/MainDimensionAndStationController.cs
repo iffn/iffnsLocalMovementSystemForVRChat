@@ -25,17 +25,16 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     
     Current test world problems:
     ----------------------------
-    - VRC World respawn height not working correctly --> Fall speed results in overshoot
+
 
     Stuff to be fixed:
     ------------------
-    - Going too far down by jumping off a high dimension will mean the player eventually reaches the respawn height
-        - Set the respawn height of the VRCWorldController to -10000
-        - Create a custom respawn script relative to the current dimension that kicks the player out of the station with exit location -10000 -> To be tested
+    - In some cases, joining players to not become the owner of their stations, at least from the main controller owners perspective -> implement error check and resulting fix on owner side
 
     Future improvements:
     --------------------
-    - Encapsulate stuff
+    - Use OnRespawn function to detect respawn in order to allow more spawn points
+    - Encapsulate stuff (When U# 1.0 is released)
     - Far away players need to be recentered
     - Option to keep player vertical if the dimension rotates
         Use Main dimension controller as player position
