@@ -18,9 +18,8 @@ MonoBehaviour:
   assemblyError: 
   sourceCsScript: {fileID: 11500000, guid: 248d53c77a372eb41a1a4312a2801793, type: 3}
   scriptVersion: 2
+  compiledVersion: 2
   behaviourSyncMode: 4
-  behaviourIDHeapVarName: __refl_const_intnl_udonTypeID
-  compileErrors: []
   hasInteractEvent: 0
   scriptID: 1741437466898569278
   serializationData:
