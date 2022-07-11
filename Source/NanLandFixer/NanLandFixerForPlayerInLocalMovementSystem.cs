@@ -31,9 +31,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         void FixedUpdate()
         {
+            //Disable for editor due to a velocity peak when moving up steps
             #if UNITY_EDITOR
             return;
             #endif
+            
 
             if (LocalPlayer == null)
             {

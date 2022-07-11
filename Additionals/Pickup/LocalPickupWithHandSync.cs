@@ -32,9 +32,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         void Start()
         {
             linkedPickup = (VRC_Pickup)transform.GetComponent(typeof(VRC_Pickup));
-            #if !UNITY_EDITOR
+            //#if !UNITY_EDITOR
             myPlayerId = Networking.LocalPlayer.playerId;
-            #endif
+            //#endif
             LinkedDimensionController = LinkedMainDimensionAndStationController.GetLinkedDimensionController();
 
             if (VRCPlayerApi.GetPlayerCount() == 1)
