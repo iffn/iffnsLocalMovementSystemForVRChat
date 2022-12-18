@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: LocalStationController
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: e1cf59b6172760e47aaf165a0339e90e,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 0371f7adabf26d54e9557c861a351519,
     type: 2}
   udonAssembly: 
   assemblyError: 

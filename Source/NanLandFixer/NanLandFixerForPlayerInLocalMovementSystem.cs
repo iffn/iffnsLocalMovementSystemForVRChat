@@ -31,6 +31,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         void FixedUpdate()
         {
+            // Ignore in editor due to velocity spikes in client sim: https://github.com/vrchat-community/ClientSim/issues/31
             #if UNITY_EDITOR
             return;
             #endif

@@ -70,10 +70,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             UpdatePosition();
 
-            #if UNITY_EDITOR
-            return;
-            #endif
-
             CheckRespawnHeight();
         }
 
@@ -198,9 +194,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             returnString += "Name = " + transform.name + newLine;
             returnString += "Current dimension = " + isCurrentDimension + newLine;
             returnString += "dimensionNumber = " + dimensionId + newLine;
-            #if !UNITY_EDITOR
             returnString += "Owner = " + Networking.GetOwner(gameObject).playerId + ": " + Networking.GetOwner(gameObject).displayName + newLine;
-            #endif
             returnString += "LocalDimensionPosition = " + LocalDimensionPosition + newLine;
             returnString += "LocalDimensionRotation = " + LocalDimensionRotation.eulerAngles + newLine;
             returnString += "Local position = " + transform.localPosition + newLine;

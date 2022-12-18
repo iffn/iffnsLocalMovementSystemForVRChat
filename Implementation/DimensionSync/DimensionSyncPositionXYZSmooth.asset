@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: DimensionSyncPositionXYZSmooth
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: ea0028b8a1778c548b1dc8fd09e4a224,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 41ae30e7074822c478044762bc4064f0,
     type: 2}
   udonAssembly: 
   assemblyError: 

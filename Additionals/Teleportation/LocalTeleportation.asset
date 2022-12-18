@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: LocalTeleportation
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: fedb1544d7ab6a9499204ffe44283250,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 36636ace50f17c84f8e67f6f4051c6aa,
     type: 2}
   udonAssembly: 
   assemblyError: 

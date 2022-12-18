@@ -154,9 +154,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         void Start()
         {
-            #if !UNITY_EDITOR
             wasOwner = Networking.IsOwner(gameObject);
-            #endif
 
             //Checks
             if (LinkedStationAssigner == null)
@@ -178,7 +176,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             //Setup
             LinkedMainDimensionController.Setup(linkedMainController: this, DimensionTransformationHelper: DimensionTransformationHelper);
 
-            #if !UNITY_EDITOR
             LinkedStationAssigner.Setup(linkedMainController: this);
 
             if (VRCPlayerApi.GetPlayerCount() == 1) //Note: GetPlayerCount seems to be set correctly, while synced variables do not have their correct state yet
@@ -189,7 +186,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             {
                 LinkedStationAssigner.JoinAsFollowingPlayer();
             }
-            #endif
         }
 
         public void SetWorldDimensionAsActiveAndResetPosition() //ToDo: Encapsulate

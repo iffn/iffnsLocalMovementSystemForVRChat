@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: DimensionSyncAngleQuaternionSmooth
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: b74224ee04086e4428c38c437202cd24,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 31b2bbc5d0a71894c834b2402e6b8c6d,
     type: 2}
   udonAssembly: 
   assemblyError: 

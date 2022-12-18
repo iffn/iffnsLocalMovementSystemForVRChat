@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c333ccfdd0cbdbc4ca30cef2dd6e6b9b, type: 3}
   m_Name: LocalPickupWithoutSync
   m_EditorClassIdentifier: 
-  serializedUdonProgramAsset: {fileID: 11400000, guid: 25e8257a1e3c6b042a0456d61fd85c78,
+  serializedUdonProgramAsset: {fileID: 11400000, guid: 69eef78a7f9063247b1f1123964416d0,
     type: 2}
   udonAssembly: 
   assemblyError: 
