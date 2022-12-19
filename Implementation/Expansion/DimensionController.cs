@@ -185,9 +185,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             if (LinkedDimensionController != null) LinkedDimensionController.SetInversedDimensionSetting(inversedDimensionReference: this);
         }
 
-        public void SetAsCurrentDimension(int origin)
+        public void SetAsCurrentDimension()
         {
-            LinkedMainDimensionController.LinkedMainController.SetCurrentDimension(this, origin);
+            LinkedMainDimensionController.LinkedMainController.SetCurrentDimension(this);
         }
 
         public string GetCurrentDebugState()

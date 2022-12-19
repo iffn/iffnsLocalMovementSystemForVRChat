@@ -100,7 +100,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             {
                 linkedMainStationController.PlayerIsCurrentlyUsingOtherStation = true;
                 //LinkedMainController.OutputLogText("Player position on seating station entry = " + Networking.LocalPlayer.GetPosition());
-                if (LinkedEnterDimension != null) LinkedMainController.SetCurrentDimension(LinkedEnterDimension, 2);
+                if (LinkedEnterDimension != null) LinkedMainController.SetCurrentDimension(LinkedEnterDimension);
             }
         }
 
@@ -114,7 +114,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             {
                 linkedMainStationController.PlayerIsCurrentlyUsingOtherStation = false;
                 //LinkedMainController.OutputLogText("Player position on seating station exit = " + Networking.LocalPlayer.GetPosition());
-                if(LinkedExitDimension != null) LinkedMainController.SetCurrentDimension(LinkedExitDimension, 3);
+                if(LinkedExitDimension != null) LinkedMainController.SetCurrentDimension(LinkedExitDimension);
             }
         }
 

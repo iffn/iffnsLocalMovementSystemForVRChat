@@ -203,16 +203,14 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         {
             DimensionController worldDimension = linkedMainDimensionController.GetDimension(0);
 
-            SetCurrentDimension(worldDimension, 1);
+            SetCurrentDimension(worldDimension);
 
             worldDimension.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
-        public void SetCurrentDimension(DimensionController newDimension, int origin)
+        public void SetCurrentDimension(DimensionController newDimension)
         {
             if (linkedMainDimensionController.CurrentDimension == newDimension) return; //Ignore transition to same dimension
-
-            OutputLogText("Entering dimension called " + newDimension.transform.name + " from " + origin);
 
             LinkedMainStationController.SetDimensionAttachment(newDimension);
 

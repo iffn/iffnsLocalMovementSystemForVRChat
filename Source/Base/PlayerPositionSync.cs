@@ -105,15 +105,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         }
 
         //Update:
-        bool log = false;
-
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Home))
-            {
-                log = !log;
-            }
-
             if (ownedByMe)
             {
                 if (synced)
@@ -157,16 +150,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             Transform newDimensionTransform = attachedDimension.transform;
 
-            //Ensure smooth sync during station transition
-            Vector3 previousPosition = lastLocalPosition;
-            Vector3 previousSpeed = localPositionSpeed;
-                
+           //Ensure smooth sync during station transition
             lastLocalPosition = newDimensionTransform.InverseTransformPoint(AttachedDimensionTransform.TransformPoint(lastLocalPosition));
 
-            linkedMainDimensionController.LinkedMainController.OutputLogText($"last position moved from {previousPosition} to {lastLocalPosition}");
-            linkedMainDimensionController.LinkedMainController.OutputLogText($"speed changed from {previousSpeed} to {localPositionSpeed}");
-
-            //ToDo: Same for heading
+            Vector3 headingDirection = Quaternion.Euler(0, lastLocalHeadingDeg, 0) * Vector3.forward;
+            headingDirection = newDimensionTransform.InverseTransformDirection(AttachedDimensionTransform.TransformDirection(headingDirection));
+            lastLocalHeadingDeg = Quaternion.LookRotation(headingDirection).eulerAngles.y;
 
             stationTransform.parent = newDimensionTransform;
         }
@@ -214,8 +203,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 localPlayerPosition = syncedLocalPosition;
                 localPlayerHeadingDeg = syncedLocalHeadingDeg;
             }
-
-            if(log) linkedMainDimensionController.LinkedMainController.OutputLogText($"Moving station from {stationTransform.localPosition} to {localPlayerPosition}");
 
             stationTransform.localPosition = localPlayerPosition;
             stationTransform.localRotation = Quaternion.Euler(localPlayerHeadingDeg * Vector3.up);
