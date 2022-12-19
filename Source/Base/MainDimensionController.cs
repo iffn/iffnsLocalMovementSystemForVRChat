@@ -15,18 +15,31 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         //Runtime variables
         Transform DimensionTransformationHelper;
-        DimensionController CurrentDimension;
-        MainDimensionAndStationController LinkedMainController;
+        DimensionController currentDimension;
+        MainDimensionAndStationController linkedMainController;
         readonly string newLine = "\n";
 
-        public MainDimensionAndStationController GetLinkedMainController() { return LinkedMainController; }
-        public DimensionController GetCurrentDimension() { return CurrentDimension; }
+        public MainDimensionAndStationController LinkedMainController
+        {
+            get
+            {
+                return linkedMainController;
+            }
+        }
+
+        public DimensionController CurrentDimension
+        {
+            get
+            {
+                return currentDimension;
+            }
+        }
 
         public DimensionController GetDimension(int index)
         {
             if (Dimensions.Length - 1 < index)
             {
-                LinkedMainController.OutputLogWarning("Error: Out of scope dimension " + index + " called. Array length = " + Dimensions.Length);
+                linkedMainController.OutputLogWarning("Error: Out of scope dimension " + index + " called. Array length = " + Dimensions.Length);
 
                 return Dimensions[0]; //Error
             }
@@ -51,7 +64,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                     {
                         doublePositions[doubleCount] = i;
                         doubleCount++;
-                        LinkedMainController.OutputLogWarning("Detected double dimension assignment in Main Dimension controller regarding " + controller.transform.name + ". Fixing now.");
+                        linkedMainController.OutputLogWarning("Detected double dimension assignment in Main Dimension controller regarding " + controller.transform.name + ". Fixing now.");
                         isDouble = true;
                         break;
                     }
@@ -87,7 +100,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         public void Setup(MainDimensionAndStationController linkedMainController, Transform DimensionTransformationHelper)
         {
-            this.LinkedMainController = linkedMainController;
+            this.linkedMainController = linkedMainController;
 
             foreach (DimensionPrefabOrganizer organizer in PrefabOrganizers)
             {
@@ -101,8 +114,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 Dimensions[i].Setup(LinkedMainDimensionController: this, dimensionNumber: i);
             }
 
-            CurrentDimension = Dimensions[0];
-            CurrentDimension.isCurrentDimension = true;
+            currentDimension = Dimensions[0];
+            currentDimension.isCurrentDimension = true;
 
             this.DimensionTransformationHelper = DimensionTransformationHelper;
         }
@@ -139,7 +152,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             //Assign new dimension
             DimensionController previousDimension = CurrentDimension;
-            CurrentDimension = newDimension;
+            currentDimension = newDimension;
 
             //Reset old station
             previousDimension.ResetInversedDimensionSetting();

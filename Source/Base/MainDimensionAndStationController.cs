@@ -70,11 +70,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         //Unity assignments
         [Header("To be set manually")]
         [Tooltip("Links to the Main dimension controller")]
-        [SerializeField] MainDimensionController LinkedMainDimensionController;
+        [SerializeField] MainDimensionController linkedMainDimensionController;
         [Tooltip("Enable if the log test should be saved. Can be accessed using the LogText value")]
         [SerializeField] bool SaveLogText;
         [Header("Already set in the prefab")]
-        [SerializeField] StationAssignmentController LinkedStationAssigner;
+        [SerializeField] MainStationController LinkedMainStationController;
         [SerializeField] Transform DimensionTransformationHelper;
         //[SerializeField] SingleScriptDebugState LinkedLogOutput;
 
@@ -84,17 +84,22 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         uint oldLogLines = 0;
         readonly uint maxLogLines = 200;
         string DebugStringTitle = "iffns LocalMovementSystem ";
-        bool wasOwner = false;
         readonly string newLine = "\n";
 
-        public MainDimensionController GetLinkedDimensionController()
+        public MainDimensionController LinkedDimensionController
         {
-            return LinkedMainDimensionController;
+            get
+            {
+                return linkedMainDimensionController;
+            }
         }
 
-        public StationAssignmentController GetLinkedStationController()
+        public MainStationController GetLinkedMainStationController
         {
-            return LinkedStationAssigner;
+            get
+            {
+                return LinkedMainStationController;
+            }
         }
 
         public void OutputLogText(string message)
@@ -154,15 +159,13 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
         void Start()
         {
-            wasOwner = Networking.IsOwner(gameObject);
-
             //Checks
-            if (LinkedStationAssigner == null)
+            if (LinkedMainStationController == null)
             {
-                OutputLogWarning("LinkedStationAssigner is not set in Main controller");
+                OutputLogWarning("LinkedMainStationController is not set in Main controller");
                 return;
             }
-            if (LinkedMainDimensionController == null)
+            if (linkedMainDimensionController == null)
             {
                 OutputLogWarning("LinkedMainDimensionController is not set in Main controller");
                 return;
@@ -174,69 +177,54 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
 
             //Setup
-            LinkedMainDimensionController.Setup(linkedMainController: this, DimensionTransformationHelper: DimensionTransformationHelper);
+            linkedMainDimensionController.Setup(linkedMainController: this, DimensionTransformationHelper: DimensionTransformationHelper);
 
-            LinkedStationAssigner.Setup(linkedMainController: this);
+            OutputCurrentDebug(2);
 
-            if (VRCPlayerApi.GetPlayerCount() == 1) //Note: GetPlayerCount seems to be set correctly, while synced variables do not have their correct state yet
+            LinkedMainStationController.SetupFromMainController(this);
+
+            OutputCurrentDebug(3);
+        }
+
+        public void OutputCurrentDebug(int index)
+        {
+            OutputLogText($"Debug {index}: Main dimension: = {linkedMainDimensionController.CurrentDimension.transform.name} at {linkedMainDimensionController.CurrentDimension.transform.position}, player position = {Networking.LocalPlayer.GetPosition()}");
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Home))
             {
-                LinkedStationAssigner.JoinAsFirstPlayer();
-            }
-            else
-            {
-                LinkedStationAssigner.JoinAsFollowingPlayer();
+                OutputCurrentDebug(-1);
             }
         }
 
         public void SetWorldDimensionAsActiveAndResetPosition() //ToDo: Encapsulate
         {
-            DimensionController worldDimension = LinkedMainDimensionController.GetDimension(0);
+            DimensionController worldDimension = linkedMainDimensionController.GetDimension(0);
 
-            SetCurrentDimension(worldDimension);
-            worldDimension.transform.position = Vector3.zero;
-            worldDimension.transform.rotation = Quaternion.identity;
+            SetCurrentDimension(worldDimension, 1);
+
+            worldDimension.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
         }
 
-        public void SetCurrentDimension(DimensionController newDimension)
+        public void SetCurrentDimension(DimensionController newDimension, int origin)
         {
-            if (LinkedMainDimensionController.GetCurrentDimension() == newDimension) return; //Ignore transition to same dimension
+            if (linkedMainDimensionController.CurrentDimension == newDimension) return; //Ignore transition to same dimension
 
-            //OutputLogText("Entering dimension called " + newDimension.transform.name);
+            OutputLogText("Entering dimension called " + newDimension.transform.name + " from " + origin);
 
-            LinkedStationAssigner.SetMyDimension(newDimension);
+            LinkedMainStationController.SetDimensionAttachment(newDimension);
 
-            LinkedMainDimensionController.SetMyDimension(newDimension);
-        }
-
-        public override void OnPlayerJoined(VRCPlayerApi player)
-        {
-            if (player == Networking.LocalPlayer) return;
-
-            LinkedStationAssigner.PlayerJoined(player: player);
-        }
-
-        public override void OnPlayerLeft(VRCPlayerApi player)
-        {
-            if(Networking.IsOwner(gameObject))
-            {
-                if (!wasOwner)
-                {
-                    OutputLogText("Transfering ownership to of MainDimensionAndStationController to myself");
-                    wasOwner = true;
-                    Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedStationAssigner.gameObject);
-                    Networking.SetOwner(player: Networking.LocalPlayer, obj: LinkedMainDimensionController.gameObject);
-                }
-
-                LinkedStationAssigner.ResetAndSyncStation(player: player);
-            }
+            linkedMainDimensionController.SetMyDimension(newDimension);
         }
 
         public string GetCurrentDebugState()
         {
             string returnString = "";
 
-            returnString += LinkedStationAssigner.GetCurrentDebugState() + newLine;
-            returnString += LinkedMainDimensionController.GetCurrentDebugState() + newLine;
+            returnString += LinkedMainStationController.GetCurrentDebugState() + newLine;
+            returnString += linkedMainDimensionController.GetCurrentDebugState() + newLine;
 
             return returnString;
         }

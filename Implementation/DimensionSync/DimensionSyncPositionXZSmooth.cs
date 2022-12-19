@@ -8,7 +8,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
     [UdonBehaviourSyncMode(BehaviourSyncMode.Continuous)]
     public class DimensionSyncPositionXZSmooth : UdonSharpBehaviour
     {
-        [UdonSynced(UdonSyncMode.Smooth)] Vector2 PositionSync;
+        [UdonSynced(UdonSyncMode.Smooth)] Vector2 PositionSync = new Vector2(100, 100); //ToDo: Fix initially at 0 issue -> Late joiner puts dimension at origin and enters trigger
 
         [SerializeField] DimensionController LinkedDimension;
         [SerializeField] bool ResetYPosition = true;

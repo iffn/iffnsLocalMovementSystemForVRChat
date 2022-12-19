@@ -23,7 +23,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         {
             Networking.LocalPlayer.TeleportTo(teleportPos: TargetTransform.position, teleportRot: TargetTransform.rotation, teleportOrientation: VRC_SceneDescriptor.SpawnOrientation.Default, lerpOnRemote: false);
 
-            TargetDimension.SetAsCurrentDimension();
+            TargetDimension.SetAsCurrentDimension(5);
         }
     }
 }

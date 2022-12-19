@@ -14,7 +14,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
         //Runtime variables
         MainDimensionAndStationController LinkedMainController;
-        StationAssignmentController linkedStationAssignmentController;
+        MainStationController linkedMainStationController;
         VRCStation linkedVRCStation;
         int attachedPlayerId = -1;
         bool stationInUse;
@@ -39,7 +39,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         {
             if (LinkedEnterDimension != null)
             {
-                if(LinkedEnterDimension.GetLinkedMainDimensionController() == null || LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController() == null)
+                if(LinkedEnterDimension.GetLinkedMainDimensionController() == null || LinkedEnterDimension.GetLinkedMainDimensionController().LinkedMainController == null)
                 {
                     SendCustomEventDelayedFrames(eventName: nameof(Setup), delayFrames: 1, eventTiming: VRC.Udon.Common.Enums.EventTiming.Update);
                 }
@@ -50,7 +50,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             }
             else if (LinkedExitDimension != null)
             {
-                if (LinkedExitDimension.GetLinkedMainDimensionController() == null || LinkedExitDimension.GetLinkedMainDimensionController().GetLinkedMainController() == null)
+                if (LinkedExitDimension.GetLinkedMainDimensionController() == null || LinkedExitDimension.GetLinkedMainDimensionController().LinkedMainController == null)
                 {
                     SendCustomEventDelayedFrames(eventName: nameof(Setup), delayFrames: 1, eventTiming: VRC.Udon.Common.Enums.EventTiming.Update);
                 }
@@ -65,11 +65,11 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         {
             if (LinkedEnterDimension != null)
             {
-                LinkedMainController = LinkedEnterDimension.GetLinkedMainDimensionController().GetLinkedMainController();
+                LinkedMainController = LinkedEnterDimension.GetLinkedMainDimensionController().LinkedMainController;
             }
             else if (LinkedExitDimension != null)
             {
-                LinkedMainController = LinkedExitDimension.GetLinkedMainDimensionController().GetLinkedMainController();
+                LinkedMainController = LinkedExitDimension.GetLinkedMainDimensionController().LinkedMainController;
             }
             else
             {
@@ -77,7 +77,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             }
 
             linkedVRCStation = (VRCStation)transform.GetComponent(typeof(VRCStation));
-            linkedStationAssignmentController = LinkedMainController.GetLinkedStationController();
+            linkedMainStationController = LinkedMainController.GetLinkedMainStationController;
         }
 
         public void UseAttachedStation()
@@ -86,7 +86,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             {
                 //LinkedMainController.OutputLogText("Attempting station entry");
                 linkedVRCStation.UseStation(Networking.LocalPlayer);
-                linkedStationAssignmentController.PlayerIsCurrentlyUsingOtherStation = true;
+                linkedMainStationController.PlayerIsCurrentlyUsingOtherStation = true;
             }
         }
 
@@ -98,9 +98,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
             if (player == Networking.LocalPlayer)
             {
-                linkedStationAssignmentController.PlayerIsCurrentlyUsingOtherStation = true;
+                linkedMainStationController.PlayerIsCurrentlyUsingOtherStation = true;
                 //LinkedMainController.OutputLogText("Player position on seating station entry = " + Networking.LocalPlayer.GetPosition());
-                if (LinkedEnterDimension != null) LinkedMainController.SetCurrentDimension(LinkedEnterDimension);
+                if (LinkedEnterDimension != null) LinkedMainController.SetCurrentDimension(LinkedEnterDimension, 2);
             }
         }
 
@@ -112,9 +112,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
             if (player == Networking.LocalPlayer)
             {
-                linkedStationAssignmentController.PlayerIsCurrentlyUsingOtherStation = false;
+                linkedMainStationController.PlayerIsCurrentlyUsingOtherStation = false;
                 //LinkedMainController.OutputLogText("Player position on seating station exit = " + Networking.LocalPlayer.GetPosition());
-                if(LinkedExitDimension != null) LinkedMainController.SetCurrentDimension(LinkedExitDimension);
+                if(LinkedExitDimension != null) LinkedMainController.SetCurrentDimension(LinkedExitDimension, 3);
             }
         }
 

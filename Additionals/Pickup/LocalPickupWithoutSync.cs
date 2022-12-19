@@ -22,7 +22,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         void Start()
         {
             linkedPickup = (VRC_Pickup)transform.GetComponent(typeof(VRC_Pickup));
-            LinkedDimensionController = LinkedMainDimensionAndStationController.GetLinkedDimensionController();
+            LinkedDimensionController = LinkedMainDimensionAndStationController.LinkedDimensionController;
             transform.parent = InitiallyLinkedDimension.transform;
         }
 
@@ -30,14 +30,14 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         {
             if (linkedPickup.IsHeld)
             {
-                DimensionController attachedDimension = LinkedDimensionController.GetCurrentDimension();
+                DimensionController attachedDimension = LinkedDimensionController.CurrentDimension;
                 transform.parent = attachedDimension.transform;
             }
         }
 
         public override void OnDrop()
         {
-            DimensionController attachedDimension = LinkedDimensionController.GetCurrentDimension();
+            DimensionController attachedDimension = LinkedDimensionController.CurrentDimension;
             transform.parent = attachedDimension.transform;
         }
 

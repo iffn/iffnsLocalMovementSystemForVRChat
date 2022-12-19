@@ -50,6 +50,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             if (velocityMagnitude > playerVelocityMax && velocityMagnitude > lastPlayerVelocity * maxVelocityIncreaseFactorPerFixedFrame)
             {
+                LinkedMainDimensionAndStationController.OutputCurrentDebug(6);
+
                 string outputText = "Velocity fixed with velocity = " + velocity + ", position = " + Networking.LocalPlayer.GetPosition() + ", last position = " + lastPosition + ", last position 2 = " + lastPosition2;
 
                 if (LinkedMainDimensionAndStationController != null) LinkedMainDimensionAndStationController.OutputLogWarning(outputText);

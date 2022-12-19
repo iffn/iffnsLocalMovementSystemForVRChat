@@ -33,7 +33,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
         {
             linkedPickup = (VRC_Pickup)transform.GetComponent(typeof(VRC_Pickup));
             myPlayerId = Networking.LocalPlayer.playerId;
-            LinkedDimensionController = LinkedMainDimensionAndStationController.GetLinkedDimensionController();
+            LinkedDimensionController = LinkedMainDimensionAndStationController.LinkedDimensionController;
 
             if (VRCPlayerApi.GetPlayerCount() == 1)
             {
@@ -53,7 +53,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
 
             if (attachedPlayerID == myPlayerId)
             {
-                DimensionController attachedDimension = LinkedDimensionController.GetCurrentDimension();
+                DimensionController attachedDimension = LinkedDimensionController.CurrentDimension;
                 transform.parent = attachedDimension.transform;
 
                 int currentDimensionId = attachedDimension.GetDimensionId();
@@ -92,7 +92,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat.Additionals
             SetOwner();
 
             //Local values
-            DimensionController attachedDimension = LinkedDimensionController.GetCurrentDimension();
+            DimensionController attachedDimension = LinkedDimensionController.CurrentDimension;
             transform.parent = attachedDimension.transform;
 
             //Sync values

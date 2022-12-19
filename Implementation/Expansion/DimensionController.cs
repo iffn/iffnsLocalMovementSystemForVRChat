@@ -11,7 +11,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         //Unity assignments
         [Header("To be set manually. None for World Dimension")]
         [Tooltip("Links to the parent dimension. None in the World Dimension")]
-        [SerializeField] DimensionController LinkedDimensionController;
+        [SerializeField] DimensionController linkedDimensionController;
         [Header("To be set manually")]
         [Tooltip("Enable if the player should respawn in this dimension. Usually only for world dimension")]
         [SerializeField] bool EnableRespawnHeight = false;
@@ -34,18 +34,21 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             return LinkedMainDimensionController;
         }
 
-        public DimensionController GetLinkedDimensionController()
+        public DimensionController LinkedDimensionController
         {
-            return LinkedDimensionController;
+            get
+            {
+                return linkedDimensionController;
+            }
         }
 
         public void SetLinkedDimensionControllerIfNotAlreadySet(DimensionController linkedDimensionController)
         {
-            if (this.LinkedDimensionController != null) return;
+            if (this.linkedDimensionController != null) return;
 
-            this.LinkedDimensionController = linkedDimensionController;
+            this.linkedDimensionController = linkedDimensionController;
 
-            transform.parent = LinkedDimensionController.transform;
+            transform.parent = linkedDimensionController.transform;
         }
 
         public void Setup(MainDimensionController LinkedMainDimensionController, int dimensionNumber)
@@ -53,7 +56,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             this.LinkedMainDimensionController = LinkedMainDimensionController;
 
             if ((transform.localScale - Vector3.one).magnitude > 0.0001f)
-                LinkedMainDimensionController.GetLinkedMainController().OutputLogWarning("Error in station " + transform.name + " with ID " + dimensionId + ": Local scale is not (1, 1, 1) but " + transform.localScale);
+                LinkedMainDimensionController.LinkedMainController.OutputLogWarning("Error in station " + transform.name + " with ID " + dimensionId + ": Local scale is not (1, 1, 1) but " + transform.localScale);
 
             dimensionId = dimensionNumber;
 
@@ -80,9 +83,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             if(Networking.LocalPlayer.GetPosition().y - transform.position.y < RespawnHeightIfAttached) //Error happens when you leave the world: Ignore
             {
-                LinkedMainDimensionController.GetLinkedMainController().OutputLogText("Rewpawning player due to respawn height");
+                LinkedMainDimensionController.LinkedMainController.OutputLogText("Rewpawning player due to respawn height");
 
-                LinkedMainDimensionController.GetLinkedMainController().GetLinkedStationController().RespawnPlayer();
+                Networking.LocalPlayer.Respawn();
             }
         }
 
@@ -101,7 +104,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 return;
             }
 
-            if (LinkedMainDimensionController.GetCurrentDimension() == this) //If current dimension
+            if (LinkedMainDimensionController.CurrentDimension == this) //If current dimension
             {
                 //Don't move dimension
             }
@@ -173,7 +176,7 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             PlayerShouldBeLocation.position = Networking.LocalPlayer.GetPosition();
             PlayerShouldBeLocation.rotation = LinkedMainDimensionController.GetHeadingRotationFromRotation(Networking.LocalPlayer.GetRotation()); //In case player is in rotated seat during transition
 
-            //LinkedMainDimensionController.GetLinkedMainController().OutputLogText("Player position after completion = " + PlayerShouldPeLocation.position);
+            //LinkedMainDimensionController.LinkedMainController.OutputLogText("Player position after completion = " + PlayerShouldPeLocation.position);
 
             //Set hierarchy
             transform.parent = LinkedMainDimensionController.transform;
@@ -182,9 +185,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             if (LinkedDimensionController != null) LinkedDimensionController.SetInversedDimensionSetting(inversedDimensionReference: this);
         }
 
-        public void SetAsCurrentDimension()
+        public void SetAsCurrentDimension(int origin)
         {
-            LinkedMainDimensionController.GetLinkedMainController().SetCurrentDimension(this);
+            LinkedMainDimensionController.LinkedMainController.SetCurrentDimension(this, origin);
         }
 
         public string GetCurrentDebugState()
