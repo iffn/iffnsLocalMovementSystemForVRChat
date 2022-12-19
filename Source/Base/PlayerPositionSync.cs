@@ -14,6 +14,27 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
         Vector3 syncedLocalPosition;
         float syncedLocalHeadingDeg;
 
+        MainDimensionController linkedMainDimensionController;
+
+        bool ownedByMe = false;
+        bool synced = true;
+
+        Transform stationTransform;
+
+        DimensionController attachedDimension;
+
+        //Sync helpers
+        const float deserializationTimeThreshold = 1;
+        float lastDeserializationDeltaTime = 0;
+        float lastDeserializationTime = 0;
+        Vector3 localPositionSpeed = Vector3.zero;
+        Vector3 lastLocalPosition = Vector3.zero;
+        float lastLocalHeadingDeg = 0;
+        float localHeadingSpeed = 0;
+
+        bool updatedPositionAndRotation = false;
+        bool updatedDimension = false;
+
         public Vector4 LocalPositionAndHeadingSync
         {
             get
@@ -30,7 +51,9 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 syncedLocalPosition = value;
                 syncedLocalHeadingDeg = value.w;
 
-                CalculatePositionAndHeadingSpeed();
+                updatedPositionAndRotation = true;
+
+                //CalculatePositionAndHeadingSpeed();
             }
         }
 
@@ -43,15 +66,12 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             set
             {
                 syncedAttachedDimensionId = value; //Otherwise called each frame
-                UpdateDimensionAttachment();
+
+                updatedDimension = true;
+                //UpdateDimensionAttachment();
             }
         }
 
-        //Setup functions
-        MainDimensionController linkedMainDimensionController;
-
-        bool ownedByMe = false;
-        bool synced = true;
         Transform AttachedDimensionTransform
         {
             get
@@ -60,25 +80,13 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             }
         }
 
-        Transform stationTransform;
-
-        DimensionController attachedDimension;
-
-        //Sync helpers
-        const float deserializationTimeThreshold = 1;
-        float lastDeserializationDeltaTime = 0;
-        float lastDeserializationTime = 0;
-        Vector3 localPositionSpeed = Vector3.zero;
-        Vector3 lastLocalPosition = Vector3.zero;
-        float lastLocalHeadingDeg = 0;
-        float localHeadingSpeed = 0;
-
         public void Setup(WalkingStationController linkedStation, MainDimensionController linkedMainDimensionController)
         {
             this.linkedMainDimensionController = linkedMainDimensionController;
             stationTransform = linkedStation.transform;
         }
 
+        //Owner functions:
         public void Claim()
         {
             if(!Networking.IsOwner(gameObject)) Networking.SetOwner(Networking.LocalPlayer, gameObject);
@@ -88,6 +96,79 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
 
             syncedAttachedDimensionId = attachedDimension.GetDimensionId();
             stationTransform.parent = attachedDimension.transform;
+        }
+
+        public void SetDimensionAttachment(DimensionController newDimension)
+        {
+            syncedAttachedDimensionId = newDimension.GetDimensionId();
+            stationTransform.parent = newDimension.transform;
+        }
+
+        //Update:
+        bool log = false;
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Home))
+            {
+                log = !log;
+            }
+
+            if (ownedByMe)
+            {
+                if (synced)
+                {
+                    syncedLocalPosition = AttachedDimensionTransform.InverseTransformPoint(Networking.LocalPlayer.GetPosition()); //Error happens when you leave the world: Ignore
+                    syncedLocalHeadingDeg = (Quaternion.Inverse(AttachedDimensionTransform.rotation) * Networking.LocalPlayer.GetRotation()).eulerAngles.y;
+                    syncedLocalPlayerPositionAndHeading = new Vector4(syncedLocalPosition.x, syncedLocalPosition.y, syncedLocalPosition.z, syncedLocalHeadingDeg);
+                }
+            }
+            else
+            {
+                if (synced)
+                {
+                    if (updatedDimension)
+                    {
+                        UpdateDimensionAttachment();
+
+                        CalculatePositionAndHeadingSpeed();
+
+                        updatedDimension = false;
+                        updatedPositionAndRotation = false;
+                    }
+                    else if (updatedPositionAndRotation)
+                    {
+                        CalculatePositionAndHeadingSpeed();
+
+                        updatedPositionAndRotation = false;
+                    }
+
+                    UpdatePositionAndRotationValues();
+                }
+            }
+        }
+
+        
+
+        //Non-owner functions
+        public void UpdateDimensionAttachment() //ToDo: Encapsulate
+        {
+            attachedDimension = linkedMainDimensionController.GetDimension(syncedAttachedDimensionId);
+
+            Transform newDimensionTransform = attachedDimension.transform;
+
+            //Ensure smooth sync during station transition
+            Vector3 previousPosition = lastLocalPosition;
+            Vector3 previousSpeed = localPositionSpeed;
+                
+            lastLocalPosition = newDimensionTransform.InverseTransformPoint(AttachedDimensionTransform.TransformPoint(lastLocalPosition));
+
+            linkedMainDimensionController.LinkedMainController.OutputLogText($"last position moved from {previousPosition} to {lastLocalPosition}");
+            linkedMainDimensionController.LinkedMainController.OutputLogText($"speed changed from {previousSpeed} to {localPositionSpeed}");
+
+            //ToDo: Same for heading
+
+            stationTransform.parent = newDimensionTransform;
         }
 
         void CalculatePositionAndHeadingSpeed()
@@ -116,45 +197,6 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
             localHeadingSpeed = headingOffset / lastDeserializationDeltaTime;
         }
 
-        private void Update()
-        {
-            if (ownedByMe)
-            {
-                if (synced)
-                {
-                    syncedLocalPosition = AttachedDimensionTransform.InverseTransformPoint(Networking.LocalPlayer.GetPosition()); //Error happens when you leave the world: Ignore
-                    syncedLocalHeadingDeg = (Quaternion.Inverse(AttachedDimensionTransform.rotation) * Networking.LocalPlayer.GetRotation()).eulerAngles.y;
-                    syncedLocalPlayerPositionAndHeading = new Vector4(syncedLocalPosition.x, syncedLocalPosition.y, syncedLocalPosition.z, syncedLocalHeadingDeg);
-                }
-            }
-            else
-            {
-                if (synced)
-                {
-                    UpdatePositionAndRotationValues();
-                }
-            }
-        }
-
-        public void SetDimensionAttachment(DimensionController newDimension)
-        {
-            syncedAttachedDimensionId = newDimension.GetDimensionId();
-            stationTransform.parent = newDimension.transform;
-        }
-
-        public void UpdateDimensionAttachment() //ToDo: Encapsulate
-        {
-            attachedDimension = linkedMainDimensionController.GetDimension(syncedAttachedDimensionId);
-
-            Transform newDimensionTransform = attachedDimension.transform;
-
-            //Ensure smooth sync during station transition
-            lastLocalPosition = newDimensionTransform.InverseTransformPoint(AttachedDimensionTransform.TransformPoint(lastLocalPosition));
-            //ToDo: Same for heading
-
-            stationTransform.parent = newDimensionTransform;
-        }
-
         void UpdatePositionAndRotationValues()
         {
             float currentDeltaTime = Time.time - lastDeserializationTime;
@@ -172,6 +214,8 @@ namespace iffnsStuff.iffnsVRCStuff.iffnsLocalMovementSystemForVRChat
                 localPlayerPosition = syncedLocalPosition;
                 localPlayerHeadingDeg = syncedLocalHeadingDeg;
             }
+
+            if(log) linkedMainDimensionController.LinkedMainController.OutputLogText($"Moving station from {stationTransform.localPosition} to {localPlayerPosition}");
 
             stationTransform.localPosition = localPlayerPosition;
             stationTransform.localRotation = Quaternion.Euler(localPlayerHeadingDeg * Vector3.up);
